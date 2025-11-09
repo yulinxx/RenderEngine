@@ -1,5 +1,5 @@
-#ifndef RENDERWIDGET_H
-#define RENDERWIDGET_H
+#ifndef RENDER_WIDGET_H
+#define RENDER_WIDGET_H
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
@@ -89,4 +89,4 @@ private:
 };
 
 }
-#endif // RENDERWIDGET_H
+#endif // RENDER_WIDGET_H

@@ -8,6 +8,7 @@
 #include "LineBRenderer.h"
 #include "TriangleRenderer.h"
 #include "ImageRenderer.h"
+#include "TextureRenderer.h"
 #include "RenderCommon.h"
 
 #include <QOpenGLFunctions_3_3_Core>
@@ -75,6 +76,7 @@ namespace GLRhi
         std::unique_ptr<IRenderer> m_lineBRenderer;
         std::unique_ptr<IRenderer> m_triRenderer;
         std::unique_ptr<IRenderer> m_imageRenderer;
+        std::unique_ptr<IRenderer> m_texRenderer;
     };
 }
 #endif // RENDERMANAGER_H

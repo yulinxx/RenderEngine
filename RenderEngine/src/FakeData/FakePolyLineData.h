@@ -6,7 +6,7 @@
 
 namespace GLRhi
 {
-    class FakePolyLineData
+    class FakePolyLineData final
     {
     public:
         FakePolyLineData();

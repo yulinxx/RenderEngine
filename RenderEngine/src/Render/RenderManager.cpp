@@ -5,6 +5,8 @@
 
 #include "FakeData/FakePolyLineData.h"
 #include "FakeData/FakeTriangleData.h"
+#include "FakeData/FakeTextureData.h"
+#include "Common/TextureLoader.h"
 
 #include "Common/Tools.h"
 
@@ -22,6 +24,7 @@ namespace GLRhi
         m_lineBRenderer = std::make_unique<LineBRenderer>();
         m_triRenderer = std::make_unique<TriangleRenderer>();
         m_imageRenderer = std::make_unique<ImageRenderer>();
+        m_texRenderer = std::make_unique<TextureRenderer>();
     }
 
     RenderManager::~RenderManager()
@@ -48,6 +51,7 @@ namespace GLRhi
         success &= m_lineBRenderer->initialize(m_gl);
         success &= m_triRenderer->initialize(m_gl);
         success &= m_imageRenderer->initialize(m_gl);
+        success &= m_texRenderer->initialize(m_gl);
 
         if (!success)
         {
@@ -76,11 +80,12 @@ namespace GLRhi
         0.0f, 0.0f, 1.0f
         };
 
-        m_boardRenderer->render(mat);
-        m_triRenderer->render(mat);
-        m_lineRenderer->render(mat);
-        m_lineBRenderer->render(mat);
-        m_imageRenderer->render(mat);
+        //m_boardRenderer->render(mat);
+        //m_triRenderer->render(mat);
+        //m_lineRenderer->render(mat);
+        //m_lineBRenderer->render(mat);
+        //m_imageRenderer->render(mat);
+        m_texRenderer->render(mat);
     }
 
     void RenderManager::cleanup()
@@ -90,6 +95,7 @@ namespace GLRhi
         m_lineBRenderer->cleanup();
         m_triRenderer->cleanup();
         m_imageRenderer->cleanup();
+        m_texRenderer->cleanup();
 
         m_gl = nullptr;
     }
@@ -147,7 +153,7 @@ namespace GLRhi
             static_cast<TriangleRenderer*>(m_triRenderer.get())->updateData(vTriDatas);
         }
 
-        if (1)
+        if (0)
         {
             std::vector<TriangleData> vTriDatas;
             vTriDatas.reserve(10);
@@ -173,6 +179,48 @@ namespace GLRhi
                 vTriDatas.push_back(triData);
             }
             static_cast<TriangleRenderer*>(m_triRenderer.get())->updateData(vTriDatas);
+        }
+
+        if(0)
+        {
+            GLuint tex1, tex2;
+
+            std::vector<TextureData> vTexDatas(2);
+
+            vTexDatas[0].vertices = {
+                -0.8f, -0.2f, 0.0f, 0.0f,  // x,y,u,v
+                -0.4f, -0.2f, 1.0f, 0.0f,
+                -0.4f, 0.2f, 1.0f, 1.0f,
+                -0.8f, 0.2f, 0.0f, 1.0f
+            };
+            vTexDatas[0].indices = {0, 1, 2, 0, 2, 3};
+            vTexDatas[0].textureId = tex1;
+            vTexDatas[0].brush = { 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0 };
+
+            vTexDatas[1].vertices = {
+                0.4f, -0.2f, 0.0f, 0.0f,  // x,y,u,v
+                0.8f, -0.2f, 1.0f, 0.0f,
+                0.8f, 0.2f, 1.0f, 1.0f,
+                0.4f, 0.2f, 0.0f, 1.0f
+            };
+
+            vTexDatas[1].indices = {0, 1, 2, 0, 2, 3};
+            vTexDatas[1].textureId = tex2;
+
+            // m_texRenderer->updateData(vTexDatas);
+        }
+
+        if(1)
+        {
+            FakeTextureData fakeTextureData;
+            fakeTextureData.setRange(-1.0f, 1.0f, -1.0f, 1.0f);
+            fakeTextureData.setTextureSizeRange(32, 256, 32, 256);
+            fakeTextureData.generateTextures(10, m_gl);
+
+            //fakeTextureData.clear(m_gl); // 清理内存
+
+            std::vector<TextureData> vTexDatas = fakeTextureData.getTextureDatas();
+            static_cast<TextureRenderer*>(m_texRenderer.get())->updateData(vTexDatas);
         }
     }
 }

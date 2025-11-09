@@ -129,7 +129,7 @@ namespace GLRhi
         m_gl->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // 设置相机矩阵
-                float identity[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
+        float identity[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
         if (m_cameraMatLoc >= 0)
         {
             QMatrix4x4 mat(identity);

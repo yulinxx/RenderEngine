@@ -34,9 +34,15 @@ add_executable(${PROJECT_NAME}
   ${SOURCES}
 )
 
+# 添加stb库支持
+find_package(Stb REQUIRED)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Widgets Qt5::OpenGL)
+target_include_directories(${PROJECT_NAME} PRIVATE ${Stb_INCLUDE_DIR})
+
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/RenderEngine/src/)
 message("Include Dir ${CMAKE_SOURCE_DIR}/RenderEngine/src/ ")
+
 
 # 添加 Windows 平台部署 Qt 依赖库的命令
 if(WIN32)
