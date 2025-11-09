@@ -25,6 +25,7 @@ namespace GLRhi
         m_triRenderer = std::make_unique<TriangleRenderer>();
         m_imageRenderer = std::make_unique<ImageRenderer>();
         m_texRenderer = std::make_unique<TextureRenderer>();
+        m_instancedTexRenderer = std::make_unique<InstancedTextureRenderer>();
     }
 
     RenderManager::~RenderManager()
@@ -52,6 +53,7 @@ namespace GLRhi
         success &= m_triRenderer->initialize(m_gl);
         success &= m_imageRenderer->initialize(m_gl);
         success &= m_texRenderer->initialize(m_gl);
+        success &= m_instancedTexRenderer->initialize(m_gl);
 
         if (!success)
         {
@@ -86,6 +88,7 @@ namespace GLRhi
         //m_lineBRenderer->render(mat);
         //m_imageRenderer->render(mat);
         m_texRenderer->render(mat);
+        m_instancedTexRenderer->render(mat);
     }
 
     void RenderManager::cleanup()
@@ -96,6 +99,7 @@ namespace GLRhi
         m_triRenderer->cleanup();
         m_imageRenderer->cleanup();
         m_texRenderer->cleanup();
+        m_instancedTexRenderer->cleanup();
 
         m_gl = nullptr;
     }
@@ -181,7 +185,7 @@ namespace GLRhi
             static_cast<TriangleRenderer*>(m_triRenderer.get())->updateData(vTriDatas);
         }
 
-        if(0)
+        if (0)
         {
             GLuint tex1, tex2;
 
@@ -193,7 +197,7 @@ namespace GLRhi
                 -0.4f, 0.2f, 1.0f, 1.0f,
                 -0.8f, 0.2f, 0.0f, 1.0f
             };
-            vTexDatas[0].indices = {0, 1, 2, 0, 2, 3};
+            vTexDatas[0].indices = { 0, 1, 2, 0, 2, 3 };
             vTexDatas[0].textureId = tex1;
             vTexDatas[0].brush = { 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0 };
 
@@ -204,13 +208,13 @@ namespace GLRhi
                 0.4f, 0.2f, 0.0f, 1.0f
             };
 
-            vTexDatas[1].indices = {0, 1, 2, 0, 2, 3};
+            vTexDatas[1].indices = { 0, 1, 2, 0, 2, 3 };
             vTexDatas[1].textureId = tex2;
 
             // m_texRenderer->updateData(vTexDatas);
         }
 
-        if(1)
+        if (0)
         {
             FakeTextureData fakeTextureData;
             fakeTextureData.setRange(-1.0f, 1.0f, -1.0f, 1.0f);
@@ -221,6 +225,127 @@ namespace GLRhi
 
             std::vector<TextureData> vTexDatas = fakeTextureData.getTextureDatas();
             static_cast<TextureRenderer*>(m_texRenderer.get())->updateData(vTexDatas);
+        }
+
+        if (1)
+        {
+            // 使用TextureLoader加载多张图片到纹理数组
+            QStringList imagePaths = {
+                "D:/xx/Pictures/34.png",
+                "D:/xx/Pictures/34.png",
+                "D:/xx/Pictures/34.png",
+                "D:/xx/Pictures/34.png",
+                "D:/xx/Pictures/34.png",
+                "D:/xx/Pictures/34.png",
+            };
+
+            // 转换QStringList为std::vector<QString>
+            std::vector<QString> imagePathVec = imagePaths.toVector().toStdVector();
+
+            if (!imagePathVec.empty())
+            {
+                // 调用正确的createTextureArray方法，添加width和height参数
+                GLuint textureArrayId = GLRhi::TextureLoader::createTextureArray(
+                    imagePathVec,
+                    m_gl,
+                    256,  // width
+                    256,  // height
+                    GL_CLAMP_TO_EDGE,
+                    GL_LINEAR
+                );
+
+                if (textureArrayId > 0)
+                {
+                    qDebug() << "成功创建纹理数组，层数:" << imagePathVec.size();
+
+                    // 设置纹理数组
+                    static_cast<InstancedTextureRenderer*>(m_instancedTexRenderer.get())->setTextureArray(textureArrayId, imagePathVec.size());
+
+                    // 创建实例数据
+                    std::vector<InstancedTextureData> instances;
+                    float spacing = 0.3f; // 每个实例之间的间距
+                    float size = 0.2f;    // 实例大小
+                    int cols = 5;         // 列数
+
+                    // 生成网格布局的实例
+                    for (int i = 0; i < 20; ++i)
+                    { // 生成20个实例
+                        InstancedTextureData instance;
+
+                        // 计算网格位置
+                        int col = i % cols;
+                        int row = i / cols;
+
+                        // 计算实际位置（居中显示）
+                        instance.x = -0.7f + col * spacing;
+                        instance.y = 0.7f - row * spacing;
+
+                        // 设置大小
+                        instance.width = size;
+                        instance.height = size;
+
+                        // 循环使用纹理层
+                        instance.textureLayer = i % imagePathVec.size();
+
+                        // 设置透明度
+                        instance.alpha = 1.0f;
+
+                        instances.push_back(instance);
+                    }
+
+                    // 更新实例数据
+                    static_cast<InstancedTextureRenderer*>(m_instancedTexRenderer.get())->updateInstances(instances);
+                }
+                else
+                {
+                    qWarning() << "Failed to create texture array.";
+                }
+            }
+            else
+            {
+                qWarning() << "Error: No valid image paths provided.";
+            }
+        }
+
+        if (0)
+        {
+            // 使用TextureLoader加载指定图片
+            QString imagePath = "D:/xx/Pictures/34.png";
+            GLuint textureId = GLRhi::TextureLoader::loadTextureFromFile(
+                imagePath, m_gl, true, GL_CLAMP_TO_EDGE, GL_LINEAR);
+
+            if (textureId > 0)
+            {
+                qDebug() << "成功加载图片:" << imagePath;
+
+                // 创建纹理数据
+                std::vector<TextureData> vTexDatas;
+                TextureData texData;
+
+                // 设置顶点数据（-0.5到0.5范围，居中显示）
+                texData.vertices = {
+                    -0.5f, -0.5f, 0.0f, 0.0f,  // 左下角
+                    0.5f, -0.5f, 1.0f, 0.0f,   // 右下角
+                    0.5f, 0.5f, 1.0f, 1.0f,    // 右上角
+                    -0.5f, 0.5f, 0.0f, 1.0f    // 左上角
+                };
+
+                // 设置索引数据（两个三角形组成矩形）
+                texData.indices = { 0, 1, 2, 0, 2, 3 };
+
+                // 设置纹理ID和画笔颜色
+                texData.textureId = textureId;
+                texData.brush = { 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0 }; // 白色，不透明
+
+                vTexDatas.push_back(texData);
+
+                // 更新到渲染器
+                static_cast<TextureRenderer*>(m_texRenderer.get())->updateData(vTexDatas);
+            }
+            else
+            {
+                qWarning() << "加载图片失败:" << imagePath;
+            }
         }
     }
 }

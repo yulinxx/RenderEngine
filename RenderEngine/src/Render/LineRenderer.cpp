@@ -71,7 +71,7 @@ namespace GLRhi
                 continue;
 
             m_program->setUniformValue(m_uDepthLoc, b.d());
-            m_program->setUniformValue(m_uColorLoc,QVector4D(b.r(), b.g(), b.b(), b.a()));
+            m_program->setUniformValue(m_uColorLoc, QVector4D(b.r(), b.g(), b.b(), b.a()));
 
             void* byteOffset = reinterpret_cast<void*>(m_vIndexOffsets[i] * sizeof(GLuint));
             m_gl->glDrawElements(GL_LINE_STRIP, static_cast<GLsizei>(m_vIndexCounts[i]), GL_UNSIGNED_INT, byteOffset);
@@ -99,7 +99,7 @@ namespace GLRhi
 
         m_vIndexOffsets.clear();
         m_vIndexOffsets.shrink_to_fit();
-        
+
         m_vIndexCounts.clear();
         m_vIndexCounts.shrink_to_fit();
     }

@@ -84,10 +84,10 @@ namespace GLRhi
         // 计算中心点作为圆的中心
         float centerX = startX;
         float centerY = startY;
-        
+
         // 设置最大半径（使用范围的一半）
         float maxRadius = std::min((m_xMax - m_xMin) * 0.4f, (m_yMax - m_yMin) * 0.4f);
-        
+
         // 生成起始点（在圆内）
         float radius = getRandomFloat(0.0f, maxRadius * 0.8f); // 起始点不要太靠近边缘
         float angle = getRandomFloat(0.0f, static_cast<float>(2.0f * M_PI));
@@ -104,32 +104,32 @@ namespace GLRhi
             // 获取前一个点
             float prevX = m_vertices[m_vertices.size() - 3];
             float prevY = m_vertices[m_vertices.size() - 2];
-            
+
             // 计算前一个点到中心的距离
-            float distToCenter = std::sqrt((prevX - centerX) * (prevX - centerX) + 
-                                           (prevY - centerY) * (prevY - centerY));
-            
+            float distToCenter = std::sqrt((prevX - centerX) * (prevX - centerX) +
+                (prevY - centerY) * (prevY - centerY));
+
             // 计算前一个点的方向角度
             float prevAngle = std::atan2(prevY - centerY, prevX - centerX);
-            
+
             // 根据距离调整移动方向：如果靠近边缘，则向中心方向偏移更多
             float angleOffset = getRandomFloat(static_cast<float>(-M_PI / 6.0f), static_cast<float>(M_PI / 6.0f)); // 最多30度的方向变化
             float moveDistance = getRandomFloat(maxRadius * 0.02f, maxRadius * 0.1f); // 控制每步移动距离
-            
+
             // 如果接近边缘，调整角度使其更倾向于向中心移动
             if (distToCenter > maxRadius * 0.8f)
             {
                 angleOffset -= (prevAngle - std::atan2(-prevY + centerY, -prevX + centerX));
                 angleOffset *= 0.5f; // 减轻强制向中心的效果
             }
-            
+
             // 计算新角度和新距离
             float newAngle = prevAngle + angleOffset;
             float newDist = distToCenter + moveDistance * (getRandomFloat(-0.5f, 1.5f) - 0.5f);
-            
+
             // 确保距离在有效范围内
             newDist = std::max(0.0f, std::min(maxRadius, newDist));
-            
+
             // 计算新点坐标
             float nextX = centerX + newDist * std::cos(newAngle);
             float nextY = centerY + newDist * std::sin(newAngle);

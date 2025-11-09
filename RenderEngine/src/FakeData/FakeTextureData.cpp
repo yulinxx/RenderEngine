@@ -57,13 +57,10 @@ namespace GLRhi
         if (count <= 0 || !gl)
             return;
 
-        // 不再自动清理，由TextureRenderer负责管理纹理资源
-        // 清空数据向量，但让TextureRenderer负责释放旧纹理ID
         m_textureDatas.clear();
         m_textureDatas.shrink_to_fit();
         m_textureIds.clear();
         m_textureIds.shrink_to_fit();
-
 
         m_textureDatas.reserve(count);
         m_textureIds.reserve(count);
@@ -140,7 +137,6 @@ namespace GLRhi
         int height = getRandomInt(m_minHeight, m_maxHeight);
         int channels = 4;
 
-
         GLuint textureId = 0;
         //for(int i = 0; i < 100; i++)
         {
@@ -166,9 +162,7 @@ namespace GLRhi
             gl->glBindTexture(GL_TEXTURE_2D, 0);
 
             delete[] imageData;
-
         }
-
 
         float imgWidth = getRandomFloat(0.1f, 0.4f);
         float imgHeight = imgWidth * (static_cast<float>(height) / width);
@@ -208,7 +202,6 @@ namespace GLRhi
             getRandomFloat(-1.0f, 1.0f), // depth
             0
         };
-
 
         m_textureDatas.push_back(texData);
         m_textureIds.push_back(textureId);

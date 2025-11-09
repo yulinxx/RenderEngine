@@ -11,7 +11,6 @@ void main() {
     gl_Position = cameraMat * vec4(position.xy, 0.0, 1.0);
 }
 
-
 )";
 
 const char* baseTriangleFS = R"(

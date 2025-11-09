@@ -8,10 +8,10 @@ namespace GLRhi
         #version 330 core
         layout(location = 0) in vec2 position;
         layout(location = 1) in vec2 texCoord;
-        
+
         out vec2 v_TexCoord;
         uniform mat4 cameraMat;
-        
+
         void main() {
             gl_Position = cameraMat * vec4(position, 0.0, 1.0);
             v_TexCoord = texCoord;
@@ -22,10 +22,10 @@ namespace GLRhi
         #version 330 core
         in vec2 v_TexCoord;
         out vec4 fragColor;
-        
+
         uniform sampler2D tex;
         uniform float alpha;
-        
+
         void main() {
             vec4 color = texture(tex, v_TexCoord);
             fragColor = vec4(color.rgb, color.a * alpha);
@@ -103,7 +103,7 @@ namespace GLRhi
             batch.textureId = texData.textureId;
             batch.brush = texData.brush;
             m_batches.push_back(batch);
-            
+
             // 收集纹理ID以便后续清理
             m_textureIds.push_back(texData.textureId);
 

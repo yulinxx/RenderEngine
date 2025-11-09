@@ -51,7 +51,6 @@ namespace GLRhi
         return true;
     }
 
-
     void TriangleRenderer::updateData(std::vector<TriangleData>& vTriDatas)
     {
         if (!m_gl || !m_vao)

@@ -77,7 +77,6 @@ namespace GLRhi
         m_totalIndexCount = 0;
 
         m_batches.clear();
-
     }
 
     void LineRendererUbo::render(const float* cameraMat)

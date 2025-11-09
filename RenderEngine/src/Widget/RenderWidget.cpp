@@ -38,7 +38,7 @@ namespace GLRhi
         glDepthFunc(GL_LESS);
         glEnable(GL_PRIMITIVE_RESTART);
         glPrimitiveRestartIndex(0xFFFFFFFF);
-        
+
         // 初始化抗锯齿状态
         if (m_bAntiAliasEnabled)
         {
@@ -48,7 +48,7 @@ namespace GLRhi
         {
             glDisable(GL_MULTISAMPLE);
         }
-        
+
         // 初始化线框模式状态
         glPolygonMode(GL_FRONT_AND_BACK, m_bWireframeMode ? GL_LINE : GL_FILL);
 
@@ -85,7 +85,7 @@ namespace GLRhi
 
     void RenderWidget::keyPressEvent(QKeyEvent* event)
     {
-        switch(event->key())
+        switch (event->key())
         {
         case Qt::Key_F1:
             // F1功能：启用/关闭抗锯齿
@@ -129,7 +129,7 @@ namespace GLRhi
         default:
             break;
         }
-        
+
         QOpenGLWidget::keyPressEvent(event);
     }
 
