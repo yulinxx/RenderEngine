@@ -1,57 +1,63 @@
-cmake_minimum_required(VERSION 4.1)
-
-##################################################################
-# set(VCPKG_DIR "D:/Install/vcpkg/scripts/buildsystems/vcpkg.cmake")
-#set(VCPKG_DIR "C:/vcpkg/scripts/buildsystems/vcpkg.cmake")
-# set(Qt_INSTALL_DIR "C:/Qt/5.15.2/msvc2019_64/")
-# set(Qt_DIR "C:/Qt/5.15.2/msvc2019_64/lib/cmake/Qt5")
-# set(Qt_DIR "C:/Qt/5.15.2/msvc2019_64/")
-
-#set(OUT_CMAKE_MSG  TRUE)
-set(OUT_CMAKE_MSG FALSE)
-
+cmake_minimum_required(VERSION 3.10)
 
 project(RenderEngine LANGUAGES CXX)
 
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-set(CMAKE_CXX_STANDARD 17)
-set(Qt5_DIR ${Qt_DIR})
 
-find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
 
-# 收集所有源文件
-file(GLOB SOURCES 
-    "src/*.cpp"
-    "src/Common/*.cpp"
-    "src/Shader/*.cpp"
-    "src/Widget/*.cpp"
-    "src/Render/*.cpp"
-    "src/FakeData/*.cpp"
-)
-
-add_executable(${PROJECT_NAME}
-  ${SOURCES}
-)
+find_package(Qt5 COMPONENTS OpenGL REQUIRED)
 
 # 添加stb库支持
 find_package(Stb REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Widgets Qt5::OpenGL)
-target_include_directories(${PROJECT_NAME} PRIVATE ${Stb_INCLUDE_DIR})
+# 分别收集不同目录下的源文件和头文件
+file(GLOB_RECURSE RENDER_SOURCES
+    "src/Render/*.cpp"
+    "src/Shader/*.cpp"
+    "src/Common/*.cpp"
+    "src/FakeData/*.cpp"
+)
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/RenderEngine/src/)
-message("Include Dir ${CMAKE_SOURCE_DIR}/RenderEngine/src/ ")
+file(GLOB_RECURSE RENDER_HEADERS
+    "include/Render/*.h"
+    "include/Shader/*.h"
+    "include/Common/*.h"
+    "include/FakeData/*.h"
+    "include/GLRenderExport.h"
+)
 
+# 为Visual Studio创建源代码过滤器
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${RENDER_SOURCES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${RENDER_HEADERS})
 
-# 添加 Windows 平台部署 Qt 依赖库的命令
-if(WIN32)
-    # Windows 特定设置
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        WIN32_EXECUTABLE TRUE
-    )
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND "${Qt_INSTALL_DIR}/bin/windeployqt.exe" "$<TARGET_FILE:${PROJECT_NAME}>"
-        COMMENT "Deploying Qt libraries for Windows"
-    )
-endif()
+# 生成DLL项目
+add_library(${PROJECT_NAME} SHARED
+    ${RENDER_SOURCES}
+    ${RENDER_HEADERS}
+)
+
+# 设置DLL导出宏
+target_compile_definitions(${PROJECT_NAME} PRIVATE "OPENGL_RENDER_DLL_EXPORTS")
+
+# 添加头文件包含目录
+target_include_directories(${PROJECT_NAME} PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/
+    ${Stb_INCLUDE_DIR}
+)
+
+# 链接必要的库
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::OpenGL)
+
+# 设置DLL的输出目录
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+    DEBUG_POSTFIX "d"
+)

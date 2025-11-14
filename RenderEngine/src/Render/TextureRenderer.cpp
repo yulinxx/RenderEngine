@@ -1,77 +1,80 @@
-// TextureRenderer.cpp
 #include "Render/TextureRenderer.h"
+#include "Shader/TextureShader.h"
 #include <QDebug>
 
 namespace GLRhi
 {
-    const char* textureVS = R"(
-        #version 330 core
-        layout(location = 0) in vec2 position;
-        layout(location = 1) in vec2 texCoord;
-
-        out vec2 v_TexCoord;
-        uniform mat4 cameraMat;
-
-        void main() {
-            gl_Position = cameraMat * vec4(position, 0.0, 1.0);
-            v_TexCoord = texCoord;
-        }
-    )";
-
-    const char* textureFS = R"(
-        #version 330 core
-        in vec2 v_TexCoord;
-        out vec4 fragColor;
-
-        uniform sampler2D tex;
-        uniform float alpha;
-
-        void main() {
-            vec4 color = texture(tex, v_TexCoord);
-            fragColor = vec4(color.rgb, color.a * alpha);
-        }
-    )";
+    TextureRenderer::~TextureRenderer()
+    {
+        cleanup();
+    }
 
     bool TextureRenderer::initialize(QOpenGLFunctions_3_3_Core* gl)
     {
         m_gl = gl;
         if (!m_gl)
+        {
+            assert(false && "TextureRenderer::initialize: OpenGL functions not available");
             return false;
+        }
 
         m_program = new QOpenGLShaderProgram;
-        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, textureVS) ||
-            !m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, textureFS) ||
+        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, chTextureVS) ||
+            !m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, chTextureFS) ||
             !m_program->link())
         {
-            qWarning() << "Texture shader link failed:" << m_program->log();
             cleanup();
+            assert(false && "TextureRenderer: Shader link failed");
             return false;
         }
 
         m_program->bind();
-        m_texLoc = m_program->uniformLocation("tex");
-        m_alphaLoc = m_program->uniformLocation("alpha");
-        m_cameraMatLoc = m_program->uniformLocation("cameraMat");
+        m_uCameraMatLoc = m_program->uniformLocation("uCameraMat");
+        m_uDepthLoc = m_program->uniformLocation("uDepth");
+        m_uTexLoc = m_program->uniformLocation("uTex");
+        m_uAlphaLoc = m_program->uniformLocation("uAlpha");
+
+        bool bUniformError = (m_uCameraMatLoc < 0) || (m_uDepthLoc < 0) || (m_uTexLoc < 0) || (m_uAlphaLoc < 0);
+        if (bUniformError)
+        {
+            cleanup();
+            assert(false && "TextureRenderer: Failed to get uniform locations");
+            return false;
+        }
+
         m_program->release();
 
-        // 创建 VAO/VBO/EBO
-        m_gl->glGenVertexArrays(1, &m_vao);
-        m_gl->glGenBuffers(1, &m_vbo);
-        m_gl->glGenBuffers(1, &m_ebo);
+        m_gl->glGenVertexArrays(1, &m_nVao);
+        m_gl->glGenBuffers(1, &m_nVbo);
+        m_gl->glGenBuffers(1, &m_nEbo);
 
-        m_gl->glBindVertexArray(m_vao);
+        if (m_nVao == 0 || m_nVbo == 0 || m_nEbo == 0)
+        {
+            cleanup();
+            assert(false && "TextureRenderer: Failed to create VAO, VBO or EBO");
+            return false;
+        }
 
-        // 顶点属性：位置 (location=0)
-        m_gl->glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+        m_gl->glBindVertexArray(m_nVao);
+
+        m_gl->glBindBuffer(GL_ARRAY_BUFFER, m_nVbo);
         m_gl->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
         m_gl->glEnableVertexAttribArray(0);
 
-        // 顶点属性：纹理坐标 (location=1)
         m_gl->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
             (void*)(2 * sizeof(float)));
         m_gl->glEnableVertexAttribArray(1);
 
-        m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+        m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_nEbo);
+
+        GLenum error = m_gl->glGetError();
+        if (error != GL_NO_ERROR)
+        {
+            cleanup();
+            assert(false && "TextureRenderer: OpenGL error during initialization");
+            return false;
+        }
+
         m_gl->glBindVertexArray(0);
 
         return true;
@@ -79,48 +82,42 @@ namespace GLRhi
 
     void TextureRenderer::updateData(const std::vector<TextureData>& vTexDatas)
     {
-        if (!m_gl || !m_vao) return;
+        if (!m_gl || !m_nVao)
+            return;
 
-        // 在更新新数据前，先释放旧的纹理资源
-        for (GLuint texId : m_textureIds)
+        for (GLuint texId : m_vTextureIds)
         {
             if (texId > 0)
-            {
                 m_gl->glDeleteTextures(1, &texId);
-            }
         }
 
-        m_batches.clear();
-        m_textureIds.clear();
+        m_vBatches.clear();
+        m_vTextureIds.clear();
         size_t totalVertices = 0, totalIndices = 0;
 
-        // 预计算批次信息
         for (const auto& texData : vTexDatas)
         {
             Batch batch;
-            batch.indexOffset = totalIndices;
-            batch.indexCount = texData.indices.size();
-            batch.textureId = texData.textureId;
+            batch.indexOffset = static_cast<unsigned int>(totalIndices);
+            batch.indexCount = static_cast<unsigned int>(texData.indices.size());
+            batch.tex = texData.tex;
             batch.brush = texData.brush;
-            m_batches.push_back(batch);
+            m_vBatches.push_back(batch);
 
-            // 收集纹理ID以便后续清理
-            m_textureIds.push_back(texData.textureId);
+            m_vTextureIds.push_back(texData.tex);
 
-            totalVertices += texData.vertices.size() / 4; // 每个顶点4个float
+            totalVertices += texData.verts.size() / 4;
             totalIndices += texData.indices.size();
         }
 
-        // 合并顶点数据 (x, y, u, v)
         std::vector<float> allVertices;
         allVertices.reserve(totalVertices * 4);
         for (const auto& texData : vTexDatas)
         {
             allVertices.insert(allVertices.end(),
-                texData.vertices.begin(), texData.vertices.end());
+                texData.verts.begin(), texData.verts.end());
         }
 
-        // 合并索引数据（重新计算偏移）
         std::vector<unsigned int> allIndices;
         allIndices.reserve(totalIndices);
 
@@ -131,16 +128,15 @@ namespace GLRhi
             {
                 allIndices.push_back(idx + vertexOffset);
             }
-            vertexOffset += texData.vertices.size() / 4;
+            vertexOffset += static_cast<unsigned int>(texData.verts.size() / 4);
         }
 
-        // 上传GPU
-        m_gl->glBindVertexArray(m_vao);
-        m_gl->glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+        m_gl->glBindVertexArray(m_nVao);
+        m_gl->glBindBuffer(GL_ARRAY_BUFFER, m_nVbo);
         m_gl->glBufferData(GL_ARRAY_BUFFER, allVertices.size() * sizeof(float),
             allVertices.data(), GL_STATIC_DRAW);
 
-        m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+        m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_nEbo);
         m_gl->glBufferData(GL_ELEMENT_ARRAY_BUFFER, allIndices.size() * sizeof(unsigned int),
             allIndices.data(), GL_STATIC_DRAW);
 
@@ -149,47 +145,35 @@ namespace GLRhi
 
     void TextureRenderer::render(const float* cameraMat)
     {
-        if (!m_gl || !m_program || m_batches.empty()) return;
+        if (!m_gl || !m_program || m_vBatches.empty())
+            return;
 
         m_program->bind();
-        m_gl->glBindVertexArray(m_vao);
+        m_gl->glBindVertexArray(m_nVao);
 
-        // 启用混合
         m_gl->glEnable(GL_BLEND);
         m_gl->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        // 设置相机矩阵
-        //if (m_cameraMatLoc >= 0)
-        //{
-        //    QMatrix4x4 mat = cameraMat ? QMatrix4x4(cameraMat).transposed()
-        //        : QMatrix4x4();
-        //    m_program->setUniformValue(m_cameraMatLoc, mat);
-        //}
-
-        float identity[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
-        if (m_cameraMatLoc >= 0)
+        float identity[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+        if (m_uCameraMatLoc >= 0)
         {
             QMatrix4x4 mat(identity);
-            m_program->setUniformValue(m_cameraMatLoc, mat);
+            m_program->setUniformValue(m_uCameraMatLoc, mat);
         }
 
-        // 激活纹理单元 0
         m_gl->glActiveTexture(GL_TEXTURE0);
-        m_program->setUniformValue(m_texLoc, 0); // 绑定到 uniform sampler2D
+        m_program->setUniformValue(m_uTexLoc, 0);
 
-        // 遍历批次（每个纹理1次draw call）
-        for (const auto& batch : m_batches)
+        for (const auto& batch : m_vBatches)
         {
-            // 绑定纹理
-            m_gl->glBindTexture(GL_TEXTURE_2D, batch.textureId);
+            m_gl->glBindTexture(GL_TEXTURE_2D, batch.tex);
 
-            // 设置 alpha
-            if (m_alphaLoc >= 0)
-            {
-                m_program->setUniformValue(m_alphaLoc, batch.brush.a());
-            }
+            if (m_uAlphaLoc >= 0)
+                m_program->setUniformValue(m_uAlphaLoc, batch.brush.a());
 
-            // 绘制
+            if (m_uDepthLoc >= 0)
+                m_program->setUniformValue(m_uDepthLoc, batch.brush.d());
+
             m_gl->glDrawElements(GL_TRIANGLES, batch.indexCount, GL_UNSIGNED_INT,
                 (void*)(batch.indexOffset * sizeof(unsigned int)));
         }
@@ -203,26 +187,19 @@ namespace GLRhi
         if (!m_gl)
             return;
 
-        // 释放纹理资源
-        for (GLuint texId : m_textureIds)
+        for (GLuint texId : m_vTextureIds)
         {
             if (texId > 0)
-            {
                 m_gl->glDeleteTextures(1, &texId);
-            }
-        }
-        m_textureIds.clear();
-
-        if (m_vao)
-        {
-            m_gl->glDeleteVertexArrays(1, &m_vao);
-            m_gl->glDeleteBuffers(1, &m_vbo);
-            m_gl->glDeleteBuffers(1, &m_ebo);
-            m_vao = m_vbo = m_ebo = 0;
         }
 
-        delete m_program;
-        m_program = nullptr;
+        m_vTextureIds.clear();
+        m_vBatches.clear();
+
+        deleteEbo(m_nEbo);
+        deleteVaoVbo(m_nVao, m_nVbo);
+        deleteProgram(m_program);
+
         m_gl = nullptr;
     }
 }

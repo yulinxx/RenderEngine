@@ -1,0 +1,84 @@
+#ifndef RENDERMANAGER_H
+#define RENDERMANAGER_H
+
+#include "GLRenderExport.h"
+#include "IRenderer.h"
+#include "CheckerboardRenderer.h"
+#include "LineRenderer.h"
+#include "LineRendererUbo.h"
+#include "LineBRenderer.h"
+#include "TriangleRenderer.h"
+#include "ImageRenderer.h"
+#include "TextureRenderer.h"
+#include "InstanceTextureRenderer.h"
+#include "InstanceLineRenderer.h"
+#include "InstanceTriangleRenderer.h"
+#include "RenderCommon.h"
+#include "FakeData/DataGenerator.h"
+#include "FakeData/InstanceLineFakeData.h"
+#include "FakeData/InstanceTriangleFakeData.h"
+
+#include <QOpenGLFunctions_3_3_Core>
+#include <memory>
+
+namespace GLRhi
+{
+    class GLRENDER_EXPORT RenderManager final
+    {
+    public:
+        RenderManager();
+        ~RenderManager();
+
+    public:
+        // 初始化所有渲染器
+        bool initialize(QOpenGLFunctions_3_3_Core* gl);
+
+        // 渲染
+        void render(const float* mvpMatrix);
+
+        // 清理所有渲染器
+        void cleanup();
+
+        // 渲染器
+        IRenderer* getCheckerboardRenderer();
+        IRenderer* getLineRenderer();
+        IRenderer* getLineUboRenderer();
+        IRenderer* getLineBRenderer();
+        IRenderer* getTriangleRenderer();
+        IRenderer* getImageRenderer();
+        IRenderer* getTextureRenderer();
+        IRenderer* getInstanceTextureRenderer();
+        IRenderer* getInstanceLineRenderer();
+        IRenderer* getInstanceTriangleRenderer();
+
+        // 背景色设置
+        void setBackgroundColor(const Brush& color);
+        const Brush& getBackgroundColor() const;
+
+        // 生成测试数据，用于测试渲染
+        void genFakeData();
+
+    private:
+        QOpenGLFunctions_3_3_Core* m_gl{ nullptr };  // OpenGL函数指针
+        Brush m_bgColor{ 1.0, 1.0, 0.0, -1.0 }; // 背景色
+
+        std::unique_ptr<IRenderer> m_boardRenderer{ nullptr };
+        std::unique_ptr<IRenderer> m_lineRenderer{ nullptr };
+        std::unique_ptr<IRenderer> m_lineUBORenderer{ nullptr };
+        std::unique_ptr<IRenderer> m_lineBRenderer{ nullptr };
+        std::unique_ptr<IRenderer> m_triRenderer{ nullptr };
+        std::unique_ptr<IRenderer> m_imageRenderer{ nullptr };
+        std::unique_ptr<IRenderer> m_texRenderer{ nullptr };
+        std::unique_ptr<IRenderer> m_instancTexRenderer{ nullptr };
+        std::unique_ptr<IRenderer> m_instanceLineRenderer{ nullptr };
+        std::unique_ptr<IRenderer> m_instanceTriangleRenderer{ nullptr };
+        
+        // 实例化伪数据生成器
+        std::unique_ptr<InstanceLineFakeData> m_instanceLineFakeData{ nullptr };
+        std::unique_ptr<InstanceTriangleFakeData> m_instanceTriangleFakeData{ nullptr };
+
+        // 数据生成器
+        std::unique_ptr<DataGenerator> m_dataGen{ nullptr };
+    };
+}
+#endif // RENDERMANAGER_H

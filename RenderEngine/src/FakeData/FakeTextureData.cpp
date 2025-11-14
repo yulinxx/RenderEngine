@@ -1,5 +1,6 @@
-#include "FakeTextureData.h"
+#include "FakeData/FakeTextureData.h"
 #include "Render/TextureRenderer.h"
+
 #include <cstdlib>
 #include <ctime>
 #include <QDebug>
@@ -8,40 +9,12 @@ namespace GLRhi
 {
     FakeTextureData::FakeTextureData()
     {
-        try
-        {
-            m_generator = std::mt19937(m_randomDevice());
-        }
-        catch (...)
-        {
-            m_generator = std::mt19937(42);
-        }
+        setRange(-1.0f, 1.0f, -1.0f, 1.0f);
     }
 
     FakeTextureData::~FakeTextureData()
     {
         m_textureDatas.clear();
-    }
-
-    void FakeTextureData::setRange(float xMin, float xMax, float yMin, float yMax)
-    {
-        // 确保坐标范围在-1到1之间
-        m_xMin = std::max(-1.0f, std::min(1.0f, xMin));
-        m_xMax = std::max(-1.0f, std::min(1.0f, xMax));
-        m_yMin = std::max(-1.0f, std::min(1.0f, yMin));
-        m_yMax = std::max(-1.0f, std::min(1.0f, yMax));
-
-        // 确保xMin < xMax和yMin < yMax
-        if (m_xMin >= m_xMax)
-        {
-            m_xMin = -1.0f;
-            m_xMax = 1.0f;
-        }
-        if (m_yMin >= m_yMax)
-        {
-            m_yMin = -1.0f;
-            m_yMax = 1.0f;
-        }
     }
 
     void FakeTextureData::setTextureSizeRange(int minWidth, int maxWidth, int minHeight, int maxHeight)
@@ -76,7 +49,11 @@ namespace GLRhi
         return m_textureDatas;
     }
 
-    void FakeTextureData::clear(QOpenGLFunctions_3_3_Core* gl)
+    void FakeTextureData::clear()
+    {
+    }
+
+    void FakeTextureData::clearTexture(QOpenGLFunctions_3_3_Core* gl)
     {
         if (gl)
         {
@@ -91,44 +68,6 @@ namespace GLRhi
 
         m_textureIds.clear();
         m_textureDatas.clear();
-    }
-
-    float FakeTextureData::getRandomFloat(float min, float max)
-    {
-        if (min >= max)
-        {
-            return min;
-        }
-
-        try
-        {
-            std::uniform_real_distribution<float> distribution(min, max);
-            return distribution(m_generator);
-        }
-        catch (const std::exception& e)
-        {
-            qWarning() << "Exception in getRandomFloat: " << e.what();
-            return min;
-        }
-    }
-
-    int FakeTextureData::getRandomInt(int min, int max)
-    {
-        if (min >= max)
-        {
-            return min;
-        }
-
-        try
-        {
-            std::uniform_int_distribution<int> distribution(min, max);
-            return distribution(m_generator);
-        }
-        catch (const std::exception& e)
-        {
-            qWarning() << "Exception in getRandomInt: " << e.what();
-            return min;
-        }
     }
 
     void FakeTextureData::generateSingleTexture(QOpenGLFunctions_3_3_Core* gl)
@@ -183,7 +122,7 @@ namespace GLRhi
         TextureData texData;
 
         // 顶点数据：x, y, u, v
-        texData.vertices = {
+        texData.verts = {
             left,  bottom, 0.0f, 0.0f,
             right, bottom, 1.0f, 0.0f,
             right, top,    1.0f, 1.0f,
@@ -192,7 +131,7 @@ namespace GLRhi
 
         texData.indices = { 0, 1, 2, 0, 2, 3 };
 
-        texData.textureId = textureId;
+        texData.tex = textureId;
 
         texData.brush = {
             getRandomFloat(0.5f, 1.0f),  // r
@@ -210,8 +149,8 @@ namespace GLRhi
     unsigned char* FakeTextureData::generateRandomImageData(int width, int height, int& channels)
     {
         channels = 4;
-        size_t size = width * height * channels;
-        unsigned char* data = new unsigned char[size];
+        size_t sz = width * height * channels;
+        unsigned char* data = new unsigned char[sz];
 
         int patternType = getRandomInt(0, 3); // 0-纯色, 1-棋盘格, 2-噪声, 3-渐变
 
@@ -224,12 +163,16 @@ namespace GLRhi
             unsigned char b = static_cast<unsigned char>(getRandomInt(50, 255));
             unsigned char a = static_cast<unsigned char>(getRandomInt(128, 255));
 
-            for (size_t i = 0; i < size; i += 4)
+            for (size_t i = 0; i < sz; i += 4)
             {
-                data[i] = r;
-                data[i + 1] = g;
-                data[i + 2] = b;
-                data[i + 3] = a;
+                // 添加索引检查，防止数组溢出
+                if (i + 3 < sz)
+                {
+                    data[i] = r;
+                    data[i + 1] = g;
+                    data[i + 2] = b;
+                    data[i + 3] = a;
+                }
             }
             break;
         }
@@ -247,25 +190,32 @@ namespace GLRhi
             {
                 for (int x = 0; x < width; ++x)
                 {
-                    size_t index = (y * width + x) * 4;
-                    bool useColor1 = ((x / checkSize) + (y / checkSize)) % 2 == 0;
+                    size_t index = (static_cast<size_t>(y) * width + x) * 4;
+                    if (index + 3 < sz)
+                    {
+                        bool useColor1 = ((x / checkSize) + (y / checkSize)) % 2 == 0;
 
-                    data[index] = useColor1 ? r1 : r2;
-                    data[index + 1] = useColor1 ? g1 : g2;
-                    data[index + 2] = useColor1 ? b1 : b2;
-                    data[index + 3] = 255;
+                        data[index] = useColor1 ? r1 : r2;
+                        data[index + 1] = useColor1 ? g1 : g2;
+                        data[index + 2] = useColor1 ? b1 : b2;
+                        data[index + 3] = 255;
+                    }
                 }
             }
             break;
         }
         case 2:
         {
-            for (size_t i = 0; i < size; i += 4)
+            for (size_t i = 0; i < sz; i += 4)
             {
-                data[i] = static_cast<unsigned char>(getRandomInt(0, 255));
-                data[i + 1] = static_cast<unsigned char>(getRandomInt(0, 255));
-                data[i + 2] = static_cast<unsigned char>(getRandomInt(0, 255));
-                data[i + 3] = 255;
+                // 添加索引检查，防止数组溢出
+                if (i + 3 < sz)
+                {
+                    data[i] = static_cast<unsigned char>(getRandomInt(0, 255));
+                    data[i + 1] = static_cast<unsigned char>(getRandomInt(0, 255));
+                    data[i + 2] = static_cast<unsigned char>(getRandomInt(0, 255));
+                    data[i + 3] = 255;
+                }
             }
             break;
         }
@@ -284,10 +234,14 @@ namespace GLRhi
                 for (int x = 0; x < width; ++x)
                 {
                     size_t index = (y * width + x) * 4;
-                    data[index] = static_cast<unsigned char>(r1 + ratio * (r2 - r1));
-                    data[index + 1] = static_cast<unsigned char>(g1 + ratio * (g2 - g1));
-                    data[index + 2] = static_cast<unsigned char>(b1 + ratio * (b2 - b1));
-                    data[index + 3] = 255;
+                    // 添加索引检查，防止数组溢出
+                    if (index + 3 < sz)
+                    {
+                        data[index] = static_cast<unsigned char>(r1 + ratio * (r2 - r1));
+                        data[index + 1] = static_cast<unsigned char>(g1 + ratio * (g2 - g1));
+                        data[index + 2] = static_cast<unsigned char>(b1 + ratio * (b2 - b1));
+                        data[index + 3] = 255;
+                    }
                 }
             }
             break;

@@ -4,14 +4,7 @@ namespace GLRhi
 {
     FakeTriangleData::FakeTriangleData()
     {
-        try
-        {
-            m_generator = std::mt19937(m_randomDevice());
-        }
-        catch (...)
-        {
-            m_generator = std::mt19937(42);
-        }
+        setRange(-1.0f, 1.0f, -1.0f, 1.0f);
     }
 
     FakeTriangleData::~FakeTriangleData()
@@ -19,25 +12,16 @@ namespace GLRhi
         clear();
     }
 
-    void FakeTriangleData::setRange(float xMin, float xMax, float yMin, float yMax)
-    {
-        m_xMin = xMin;
-        m_xMax = xMax;
-        m_yMin = yMin;
-        m_yMax = yMax;
-    }
-
     void FakeTriangleData::generateTriangles(int nTriangle)
     {
         if (nTriangle <= 0)
             return;
 
-        // 清空现有数据
         clear();
 
         // 预分配内存以提高性能
-        m_vertices.reserve(nTriangle * 3 * 3); // 每个三角形3个顶点，每个顶点3个浮点数(x,y,depth)
-        m_indices.reserve(nTriangle * 3);     // 每个三角形3个索引
+        m_vertices.reserve(nTriangle * 3 * 3);  // 3个顶点 * 3个浮点数(x,y,depth)
+        m_indices.reserve(nTriangle * 3);       // 3个索引
 
         // 生成指定数量的三角形
         for (int i = 0; i < nTriangle; ++i)
@@ -110,31 +94,10 @@ namespace GLRhi
         m_vertices.push_back(depth);
 
         // 添加索引
-        // 计算基础索引：每个顶点3个浮点数，所以除以3
         unsigned int vertexCount = static_cast<unsigned int>(m_vertices.size() / 3);
-        // 新添加的三个顶点的索引是 vertexCount - 3, vertexCount - 2, vertexCount - 1
+
         m_indices.push_back(vertexCount - 3);
         m_indices.push_back(vertexCount - 2);
         m_indices.push_back(vertexCount - 1);
-
-        //// 添加三个顶点数据
-        //m_vertices.insert(m_vertices.end(), {
-        //    x1, y1, depth,
-        //    x2, y2, depth,
-        //    x3, y3, depth,
-        //    });
-
-        //// 添加索引
-        //m_indices.insert(m_indices.end(), {
-        //    baseIndex,
-        //    baseIndex + 1,
-        //    baseIndex + 2
-        //    });
-    }
-
-    float FakeTriangleData::getRandomFloat(float min, float max)
-    {
-        std::uniform_real_distribution<float> distribution(min, max);
-        return distribution(m_generator);
     }
 }

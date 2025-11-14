@@ -1,4 +1,4 @@
-#include "LineRenderer.h"
+#include "Render/LineRenderer.h"
 #include "Shader/PathShader.h"
 #include "Shader/BaseLineShader.h"
 #include <QDebug>
@@ -6,35 +6,55 @@
 
 namespace GLRhi
 {
+    LineRenderer::~LineRenderer()
+    {
+        cleanup();
+    }
+
     bool LineRenderer::initialize(QOpenGLFunctions_3_3_Core* gl)
     {
         m_gl = gl;
         if (!m_gl)
         {
-            qCritical() << "LineRenderer::initialize: OpenGL functions not available";
+            assert(false && "LineRenderer::initialize: OpenGL functions not available");
             return false;
         }
 
         m_program = new QOpenGLShaderProgram;
 
-        // 加载着色器
         if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, baseLineVS) ||
             !m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, baseLineFS) ||
             !m_program->link())
         {
-            qWarning() << "Line shader link failed:" << m_program->log();
             deleteProgram(m_program);
+            assert(false && "LineRenderer: Shader link failed");
             return false;
         }
 
-        // 缓存 uniform 位置
         m_uColorLoc = m_program->uniformLocation("uColor");
         m_uDepthLoc = m_program->uniformLocation("uDepth");
+        m_nCameraMatLoc = m_program->uniformLocation("uMVP");
+
+        bool bUniformError = (m_uColorLoc < 0) || (m_uDepthLoc < 0);
+        if (bUniformError)
+        {
+            deleteProgram(m_program);
+            assert(false && "LineRenderer: Failed to get uniform locations");
+            return false;
+        }
+
+        GLenum error = m_gl->glGetError();
+        if (error != GL_NO_ERROR)
+        {
+            cleanup();
+            assert(false && "LineRenderer: OpenGL error during initialization");
+            return false;
+        }
 
         return true;
     }
 
-    void LineRenderer::render(const float* cameraMat)
+    void LineRenderer::render(const float* mvpMatrix)
     {
         if (m_nVao == 0 || m_nVbo == 0 || m_nEbo == 0 ||
             m_vPlineBrush.empty() || m_vIndexCounts.empty() || m_vIndexOffsets.empty())
@@ -51,13 +71,10 @@ namespace GLRhi
 
         m_program->bind();
 
-        // 设置相机矩阵
-        //if (m_cameraMatLoc >= 0)
-        //{
-        //    //m_program->setUniformValue(m_cameraMatLoc, QMatrix4x4(cameraMat));
-        //}
-
-        // 启用图元重启
+        if (m_nCameraMatLoc >= 0)
+        {
+            m_program->setUniformValue(m_nCameraMatLoc, QMatrix4x4(mvpMatrix));
+        }
         m_gl->glEnable(GL_PRIMITIVE_RESTART);
         m_gl->glPrimitiveRestartIndex(0xFFFFFFFF);
 
@@ -85,15 +102,13 @@ namespace GLRhi
 
     void LineRenderer::cleanup()
     {
-        if (!m_gl)
-            return;
+        if (!m_gl) return;
 
         unbindABE();
         deleteVaoVbo(m_nVao, m_nVbo);
         deleteEbo(m_nEbo);
         deleteProgram(m_program);
 
-        // 清空 CPU 数据
         m_vPlineBrush.clear();
         m_vPlineBrush.shrink_to_fit();
 
@@ -102,6 +117,8 @@ namespace GLRhi
 
         m_vIndexCounts.clear();
         m_vIndexCounts.shrink_to_fit();
+
+        m_gl = nullptr;
     }
 
     void LineRenderer::updateData(const std::vector<PolylineData>& vPolylineDatas)
@@ -126,10 +143,9 @@ namespace GLRhi
         GLuint nVertexOffset = 0;
         GLuint nIndexOffsetE = 0;
 
-        // 处理每个polyline数据
         for (const auto& polylineData : vPolylineDatas)
         {
-            const auto& allVerts = polylineData.vertices;
+            const auto& allVerts = polylineData.verts;
             if (allVerts.empty() || allVerts.size() % 3 != 0)
             {
                 qWarning() << "Skipping invalid polyline: vertex count not divisible by 3";
@@ -143,7 +159,7 @@ namespace GLRhi
             vAllVertices.insert(vAllVertices.end(), allVerts.begin(), allVerts.end());
 
             size_t startIndex = nVertexOffset;
-            const auto& lineVertexSz = polylineData.lineVertexCounts;
+            const auto& lineVertexSz = polylineData.count;
             for (size_t count : lineVertexSz)
             {
                 for (size_t j = 0; j < count; ++j)
@@ -173,7 +189,6 @@ namespace GLRhi
         m_gl->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
         m_gl->glEnableVertexAttribArray(0);
 
-        // EBO
         m_gl->glGenBuffers(1, &m_nEbo);
         m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_nEbo);
         m_gl->glBufferData(GL_ELEMENT_ARRAY_BUFFER, vIndices.size() * sizeof(GLuint), vIndices.data(), GL_STATIC_DRAW);

@@ -1,7 +1,6 @@
 #include "FakeData/FakePolyLineData.h"
 #include <cmath>
 
-// 定义π常量，确保跨平台兼容性
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -9,30 +8,13 @@
 namespace GLRhi
 {
     FakePolyLineData::FakePolyLineData()
-        : m_xMin(-1.0f), m_xMax(1.0f), m_yMin(-1.0f), m_yMax(1.0f)
     {
-        // 初始化随机数生成器
-        try
-        {
-            m_generator = std::mt19937(m_randomDevice());
-        }
-        catch (...)
-        {
-            m_generator = std::mt19937(42);
-        }
+        // setRange(-1000.0f, 1000.0f, -1000.0f, 1000.0f);
     }
 
     FakePolyLineData::~FakePolyLineData()
     {
         clear();
-    }
-
-    void FakePolyLineData::setRange(float xMin, float xMax, float yMin, float yMax)
-    {
-        m_xMin = xMin;
-        m_xMax = xMax;
-        m_yMin = yMin;
-        m_yMax = yMax;
     }
 
     void FakePolyLineData::generateLines(int lineCount, int minPoints, int maxPoints)
@@ -47,14 +29,11 @@ namespace GLRhi
         // 清空之前的数据
         clear();
 
-        // 生成线段数量的随机分布
-        std::uniform_int_distribution<int> pointCountDist(minPoints, maxPoints);
-
         // 生成指定数量的线段
         for (int i = 0; i < lineCount; ++i)
         {
             // 随机生成当前线段的点数
-            int pointCount = pointCountDist(m_generator);
+            int pointCount = getRandomInt(minPoints, maxPoints);
             generateSingleLine(pointCount);
         }
     }
@@ -143,11 +122,5 @@ namespace GLRhi
 
         // 记录当前线段的信息
         m_lineInfos.push_back(pointCount);
-    }
-
-    float FakePolyLineData::getRandomFloat(float min, float max)
-    {
-        std::uniform_real_distribution<float> dist(min, max);
-        return dist(m_generator);
     }
 }

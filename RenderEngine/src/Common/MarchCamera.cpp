@@ -103,9 +103,23 @@ namespace GLRhi
         m_dScale *= scaleFactor;
         QPointF worldPosAfter = screenToWorld(screenPos, viewSize);
 
-        // 修正平移量，保证鼠标位置对应世界坐标不变
         m_dTransX += worldPosAfter.x() - worldPosBefore.x();
         m_dTransY += worldPosAfter.y() - worldPosBefore.y();
         updateMatrix(viewSize);
+    }
+
+    const float* MarchCamera::getMatrix() const
+    {
+        return m_cameraMat;
+    }
+
+    void MarchCamera::setEnableTrans(bool enable)
+    {
+        m_bEnableTrans = enable;
+    }
+
+    bool MarchCamera::isEnableTrans() const
+    {
+        return m_bEnableTrans;
     }
 }

@@ -2,23 +2,23 @@
 #define FAKE_TEXTURE_DATA_H
 
 #include <vector>
-#include <random>
 #include <QOpenGLFunctions_3_3_Core>
+#include "FakeData/FakeDataGenerator.h"
 
 namespace GLRhi
 {
     struct TextureData;
 
-    class FakeTextureData final
+    class FakeTextureData : public FakeDataGenerator
     {
     public:
         FakeTextureData();
-        ~FakeTextureData();
+        ~FakeTextureData() override;
 
     public:
-        // 设置XY的最小/最大范围
-        void setRange(float xMin, float xMax, float yMin, float yMax);
+        void clear() override;
 
+    public:
         // 设置纹理尺寸范围
         void setTextureSizeRange(int minWidth, int maxWidth, int minHeight, int maxHeight);
 
@@ -30,14 +30,7 @@ namespace GLRhi
         // 获取生成的纹理数据
         const std::vector<TextureData>& getTextureDatas() const;
 
-        // 清空数据并释放纹理资源
-        void clear(QOpenGLFunctions_3_3_Core* gl);
-
-        // 生成随机浮点数
-        float getRandomFloat(float min, float max);
-
-        // 生成随机整数
-        int getRandomInt(int min, int max);
+        void clearTexture(QOpenGLFunctions_3_3_Core* gl);
 
     private:
         // 生成单个纹理数据
@@ -47,11 +40,6 @@ namespace GLRhi
         unsigned char* generateRandomImageData(int width, int height, int& channels);
 
     private:
-        float m_xMin = -1.0f;           // X轴最小值
-        float m_xMax = 1.0f;            // X轴最大值
-        float m_yMin = -1.0f;           // Y轴最小值
-        float m_yMax = 1.0f;            // Y轴最大值
-
         int m_minWidth = 32;            // 最小纹理宽度
         int m_maxWidth = 256;           // 最大纹理宽度
         int m_minHeight = 32;           // 最小纹理高度
@@ -59,10 +47,6 @@ namespace GLRhi
 
         std::vector<TextureData> m_textureDatas; // 纹理数据
         std::vector<GLuint> m_textureIds;        // 存储纹理ID，用于清理
-
-        // 随机数生成器
-        std::mt19937 m_generator;
-        std::random_device m_randomDevice;
     };
 }
 

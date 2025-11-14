@@ -1,26 +1,27 @@
-#include "BaseTriangleShader.h"
+#include "Shader/BaseTriangleShader.h"
 
-// 着色器源码
 const char* baseTriangleVS = R"(
 #version 330 core
-layout(location = 0) in vec3 position; // x, y, len
+layout(location = 0) in vec3 aPosition;
 
-uniform mat4 cameraMat;
+uniform mat4 uMVP;  // Model-View-Projection矩阵
+uniform float uDepth;
 
-void main() {
-    gl_Position = cameraMat * vec4(position.xy, 0.0, 1.0);
+void main()
+{
+    gl_Position = uMVP * vec4(aPosition.xy, (1 - uDepth) / 2.0f, 1.0);
 }
-
 )";
 
 const char* baseTriangleFS = R"(
 #version 330 core
+
+uniform vec4 uColor;
+
 out vec4 fragColor;
 
-uniform vec4 color;
-uniform float depth;
-
-void main() {
-    fragColor = vec4(color.rgb, 1.0);
+void main()
+{
+    fragColor = uColor;
 }
 )";

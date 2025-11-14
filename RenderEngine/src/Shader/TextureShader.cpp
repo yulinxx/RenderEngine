@@ -1,36 +1,30 @@
-﻿#include "TextureShader.h"
+#include "Shader/TextureShader.h"
 
 const char* chTextureVS = R"(
-#version 330 core
+        #version 330 core
+        layout(location = 0) in vec2 aPosition;
+        layout(location = 1) in vec2 aTexCoord;
 
-layout(location = 0) in vec2 in_pos;
-layout(location = 1) in vec2 in_uv;
+        out vec2 v_TexCoord;
+        uniform mat4 uCameraMat;
+        uniform float uDepth;
 
-uniform mat3 cameraMat;
-uniform float depth;
-
-out vec2 texCoords;
-
-void main()
-{
-    vec3 v = cameraMat * vec3(in_pos, 1.0);
-    gl_Position = vec4(v.xy, depth, 1.0);
-
-    vec2 uvYRev = vec2(in_uv.x, 1 - in_uv.y);
-    texCoords = uvYRev;
-}
+        void main() {
+            gl_Position = uCameraMat * vec4(aPosition, (1 - uDepth) / 2.0f, 1.0);
+            v_TexCoord = aTexCoord;
+        }
 )";
 
 const char* chTextureFS = R"(
-#version 330 core
+        #version 330 core
+        in vec2 v_TexCoord;
+        out vec4 fragColor;
 
-uniform sampler2D texSampler;
-in vec2 texCoords;
+        uniform sampler2D uTex;
+        uniform float uAlpha;
 
-out vec4 fragColor;
-
-void main()
-{
-    fragColor = texture(texSampler, texCoords);
-}
+        void main() {
+            vec4 color = texture(uTex, v_TexCoord);
+            fragColor = vec4(color.rgb, color.a * uAlpha);
+        }
 )";

@@ -1,4 +1,4 @@
-#include "ColorTriangleRenderer.h"
+#include "Render/ColorTriangleRenderer.h"
 #include "Shader/PathShader.h"
 #include <QDebug>
 
@@ -9,24 +9,41 @@ namespace GLRhi
         m_gl = gl;
         if (!m_gl)
         {
-            assert(!"ColorTriangleRenderer initialize: OpenGL functions not available");
+            assert(false && "ColorTriangleRenderer initialize: OpenGL functions not available");
             return false;
         }
 
         m_program = new QOpenGLShaderProgram;
-        // 加载顶点和片段着色器（填充与线段共享基础着色器）
+
         if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, chPathVS) ||
             !m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, chPathFS) ||
             !m_program->link())
         {
-            qWarning() << "Fill shader link failed:" << m_program->log();
             deleteProgram(m_program);
+            assert(false && "ColorTriangleRenderer: Shader link failed");
             return false;
         }
 
-        // 获取Uniform变量位置
         m_program->bind();
-        m_cameraMatLoc = m_program->uniformLocation("cameraMat");
+        m_uCameraMatLoc = m_program->uniformLocation("cameraMat");
+        m_uDepthLoc = m_program->uniformLocation("depth");
+
+        bool bUniformError = (m_uCameraMatLoc < 0) || (m_uDepthLoc < 0);
+        if (bUniformError)
+        {
+            deleteProgram(m_program);
+            assert(false && "ColorTriangleRenderer: Failed to get uniform locations");
+            return false;
+        }
+
+        GLenum error = m_gl->glGetError();
+        if (error != GL_NO_ERROR)
+        {
+            deleteProgram(m_program);
+            assert(false && "ColorTriangleRenderer: OpenGL error during initialization");
+            return false;
+        }
+
         m_program->release();
         return true;
     }
@@ -37,8 +54,10 @@ namespace GLRhi
             return;
 
         m_program->bind();
-        m_program->setUniformValue(m_cameraMatLoc, QMatrix3x3(cameraMat));
-        m_program->setUniformValue("depth", m_depth);
+        if (m_uCameraMatLoc >= 0)
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix3x3(cameraMat));
+        if (m_uDepthLoc >= 0)
+            m_program->setUniformValue(m_uDepthLoc, m_dDepth);
 
         for (const auto& data : m_vTriDatas)
         {
@@ -67,14 +86,12 @@ namespace GLRhi
     {
         if (!m_gl) return;
 
-        // 释放所有VAO/VBO
         //for (auto& fill : m_vTriDatas)
         //    deleteVaoVbo(fill.vao, fill.vbo);
 
         deleteProgram(m_program);
 
         m_vTriDatas.clear();
-
         m_gl = nullptr;
     }
 
@@ -87,7 +104,6 @@ namespace GLRhi
         //triData.vertexCount = count;
         //triData.vertices.assign(data, data + count * 3); // 每个顶点3个float（x,y,depth）
 
-        //// 创建VAO/VBO
         //m_gl->glGenVertexArrays(1, &triData.vao);
         //m_gl->glGenBuffers(1, &triData.vbo);
         //m_gl->glBindVertexArray(triData.vao);

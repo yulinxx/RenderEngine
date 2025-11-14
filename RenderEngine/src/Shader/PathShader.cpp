@@ -1,104 +1,105 @@
-﻿#include "PathShader.h"
+#include "Shader/PathShader.h"
 
 const char* chPathVS = R"(
 #version 330 core
 
-layout (location = 0) in vec2 in_pos;
-layout (location = 1) in float in_len;
+layout (location = 0) in vec2 aPos;
+layout (location = 1) in float aLen;
 
-uniform mat3 cameraMat;
-uniform float depth = 0.0;
-uniform float dashScale = 1.0;
-uniform float timeOffset = 0.0;
-uniform float speed = 1.0;
-uniform int lineType = 0;
+uniform mat3 uCameraMat;
+uniform float uDepth = 0.0;
+uniform float uDashScale = 1.0;
+uniform float uTimeOffset = 0.0;
+uniform float uSpeed = 1.0;
+uniform int uLineType = 0;
 
-out float dashParam;
-flat out int o_lineType;
+out float vDashParam;
+flat out int vLineType;
 
 void main()
 {
-    vec3 pos = cameraMat * vec3(in_pos, 1.0);
-    gl_Position = vec4(pos.xy, depth, 1.0);
+    vec3 pos = uCameraMat * vec3(aPos, 1.0);
+    gl_Position = vec4(pos.xy, uDepth, 1.0);
 
-    o_lineType = lineType;
+    vLineType = uLineType;
 
-    if(lineType != 0)
+    if(uLineType != 0)
     {
-        float dashLength = in_len * dashScale * 8.0 - (timeOffset * speed);
-        dashParam = dashLength;
+        float dashLength = aLen * uDashScale * 8.0 - (uTimeOffset * uSpeed);
+        vDashParam = dashLength;
     }
     else
     {
-        dashParam = 0;
+        vDashParam = 0;
     }
 }
+
 )";
 
 const char* chPathFS = R"(
 #version 330 core
 
-uniform vec4 color;
+uniform vec4 uColor;
 
-in float dashParam;
-flat in int o_lineType;
+in float vDashParam;
+flat in int vLineType;
 
 out vec4 fragColor;
 
 void main()
 {
-    if (o_lineType != 0)
+    if (vLineType != 0)
     {
         float dDutyCycle = 0.5;
         float dPeriod = 1.0;
-        float dDashPattern = mod(dashParam, dPeriod);
+        float dDashPattern = mod(vDashParam, dPeriod);
         bool bDraw = true;
 
-        if (o_lineType == 1)
+        if (vLineType == 1)
         {
-            float combinedPattern = mod(dashParam * 2.0, 2.0);
+            float combinedPattern = mod(vDashParam * 2.0, 2.0);
             bDraw = combinedPattern < 1.4;
         }
-        else if (o_lineType == 2)
+        else if (vLineType == 2)
         {
-            float combinedPattern = mod(dashParam * 2, 5);  // 长
+            float combinedPattern = mod(vDashParam * 2, 5);  // 长
             bDraw = (combinedPattern < 3.5);
         }
-        else if (o_lineType == 3)
+        else if (vLineType == 3)
         {
-            float combinedPattern = mod(dashParam * 1.0, 4.0);   // 长 短 短
+            float combinedPattern = mod(vDashParam * 1.0, 4.0);   // 长 短 短
             bDraw = (combinedPattern < 1.6) || (combinedPattern >= 2.0 && combinedPattern < 2.6) || (combinedPattern >= 3 && combinedPattern < 3.6);
         }
-        else if (o_lineType == 4)     // 长长 点
+        else if (vLineType == 4)     // 长长 点
         {
-            float combinedPattern = mod(dashParam, 3.0);
+            float combinedPattern = mod(vDashParam, 3.0);
             bDraw = (combinedPattern < 1.5) || (combinedPattern >= 2.0 && combinedPattern < 2.2);
         }
-        else if (o_lineType == 5) // 长  点 点 点
+        else if (vLineType == 5) // 长  点 点 点
         {
-            float combinedPattern = mod(dashParam, 3.0);
+            float combinedPattern = mod(vDashParam, 3.0);
             bDraw = (0.2 < combinedPattern && combinedPattern < 1.8) || (combinedPattern >= 2.0 && combinedPattern < 2.2) ||
             (combinedPattern >= 2.4 && combinedPattern < 2.6) || (combinedPattern >= 2.8 && combinedPattern < 3.0);
         }
-        else if (o_lineType == 6)   // 长 点 点
+        else if (vLineType == 6)   // 长 点 点
         {
-            float combinedPattern = mod(dashParam, 3.0);
+            float combinedPattern = mod(vDashParam, 3.0);
             bDraw = (combinedPattern < 1.4) || (combinedPattern >= 2.0 && combinedPattern < 2.2) ||
             (combinedPattern >= 2.4 && combinedPattern < 2.6);
         }
-        else if (o_lineType == 7)   // 点 点 点
+        else if (vLineType == 7)   // 点 点 点
         {
-            float pattern = mod(dashParam, 0.8);
+            float pattern = mod(vDashParam, 0.8);
             bDraw = (pattern < 0.2) || (pattern > 0.4 && pattern < 0.6);
         }
-        else if (o_lineType == 8) // 短长 点
+        else if (vLineType == 8) // 短长 点
         {
-            float pattern = mod(dashParam, 1.0);
+            float pattern = mod(vDashParam, 1.0);
             bDraw = (pattern < 0.6) || (pattern > 0.8 && pattern < 0.90);
         }
-        else if (o_lineType == 9)
+        else if (vLineType == 9)
         {
-            float pattern = mod(dashParam, 0.8);
+            float pattern = mod(vDashParam, 0.8);
             bDraw = (pattern < 0.1) || (pattern > 0.2 && pattern < 0.45);
         }
         else
@@ -108,7 +109,7 @@ void main()
 
         if (bDraw)
         {
-            fragColor = color;
+            fragColor = uColor;
         }
         else
         {
@@ -117,7 +118,8 @@ void main()
     }
     else
     {
-        fragColor = color;
+        fragColor = uColor;
     }
 }
+
 )";
