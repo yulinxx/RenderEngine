@@ -32,7 +32,7 @@ namespace GLRhi
 
         m_program->bind();
 
-        m_uCameraMatLoc = m_program->uniformLocation("uCameraMat");
+        m_uCameraMatLoc = m_program->uniformLocation("uMVP");
         m_uDepthLoc = m_program->uniformLocation("uDepth");
         m_uColorLoc = m_program->uniformLocation("uColor");
 
