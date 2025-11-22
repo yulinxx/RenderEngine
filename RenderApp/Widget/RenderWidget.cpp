@@ -78,7 +78,7 @@ namespace GLRhi
 
         m_renderManager.render(m_camera.getMatrix());
 
-        checkGLError("paintGL");
+        //checkGLError("paintGL");
     }
 
     void RenderWidget::keyPressEvent(QKeyEvent* event)
@@ -147,7 +147,8 @@ namespace GLRhi
         }
         break;
         case Qt::Key_F4:
-            // F4：留空实现
+            // F4：随机动态数据
+            m_renderManager.dataCRUD();
             break;
         case Qt::Key_F5:
             makeCurrent();

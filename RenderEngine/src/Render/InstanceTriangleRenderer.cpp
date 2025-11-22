@@ -167,8 +167,11 @@ namespace GLRhi
         // 使用实例化绘制
         m_gl->glDrawArraysInstanced(GL_TRIANGLES, 0, 3, static_cast<GLsizei>(m_nInstanceCount));
 
-        // 禁用混合
-        m_gl->glDisable(GL_BLEND);
+        // 仅在启用了混合的情况下才禁用
+        if (m_bBlend)
+        {
+            m_gl->glDisable(GL_BLEND);
+        }
 
         m_gl->glBindVertexArray(0);
         m_program->release();
