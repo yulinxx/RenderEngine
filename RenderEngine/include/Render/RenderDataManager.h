@@ -71,7 +71,6 @@ namespace GLRhi
         void removeInstanceTexture(const TextureData& instanceTexture);
         void removeInstanceTextures(const std::vector<TextureData>& instanceTextures);
 
-
         /////////////////////
         void deleteAll();
 

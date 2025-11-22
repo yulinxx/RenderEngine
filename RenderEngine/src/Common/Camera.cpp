@@ -52,7 +52,7 @@ namespace GLRhi
             m_dTransX, m_dTransY, 0, 1 };
 
         // 矩阵乘法：ortho * trans  (列优先 → 先写左乘)
-        float tmp[16];
+        float tmp[16]{};
         for (int i = 0; i < 4; ++i)
             for (int j = 0; j < 4; ++j)
             {
@@ -135,14 +135,14 @@ namespace GLRhi
 
         const float w = static_cast<float>(viewSz.width());
         const float h = static_cast<float>(viewSz.height());
-        const float aspect = w / h;
 
         // 像素差 → NDC 差
         const float ndcDx = 2.0f * delta.x() / w;
         const float ndcDy = -2.0f * delta.y() / h;   // Y 向下
 
+        // 修改：移除Y方向的aspect除法，使X和Y方向移动一致
         const float worldDx = ndcDx;
-        const float worldDy = ndcDy / aspect;
+        const float worldDy = ndcDy;
 
         m_dTransX += worldDx;
         m_dTransY += worldDy;
