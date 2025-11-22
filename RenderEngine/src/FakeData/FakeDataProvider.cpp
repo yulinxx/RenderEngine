@@ -90,12 +90,12 @@ namespace GLRhi
         return vTriDatas;
     }
 
-    std::vector<TriangleData> FakeDataProvider::genRandomTriangleData()
+    std::vector<TriangleData> FakeDataProvider::genRandomTriangleData(size_t count /*=10*/)
     {
         std::vector<TriangleData> vTriDatas;
-        vTriDatas.reserve(10);
+        vTriDatas.reserve(count);
 
-        for (size_t i = 0; i < 10; ++i)
+        for (size_t i = 0; i < count; ++i)
         {
             FakeTriangleData fakeTriangleData;
             fakeTriangleData.setRange(-1.0f, 1.0f, -1.0f, 1.0f);
@@ -182,7 +182,7 @@ namespace GLRhi
         return vTexDatas;
     }
 
-    std::vector<TextureData> FakeDataProvider::genRandomTextureData()
+    std::vector<TextureData> FakeDataProvider::genRandomTextureData(size_t count /*=10*/)
     {
         std::vector<TextureData> vTexDatas;
 
@@ -195,14 +195,14 @@ namespace GLRhi
         FakeTextureData fakeTextureData;
         fakeTextureData.setRange(-1.0f, 1.0f, -1.0f, 1.0f);
         fakeTextureData.setTextureSizeRange(32, 256, 32, 256);
-        fakeTextureData.generateTextures(10, m_gl);
+        fakeTextureData.generateTextures(count, m_gl);
 
         vTexDatas = fakeTextureData.getTextureDatas();
 
         return vTexDatas;
     }
 
-    std::vector<InstanceTexData> FakeDataProvider::genInstanceTextureData(GLuint &tex, int &count)
+    std::vector<InstanceTexData> FakeDataProvider::genInstanceTextureData(GLuint &tex, int &count, size_t instanceCount /*=20*/)
     {
         std::vector<InstanceTexData> vInstances;
 
@@ -238,7 +238,7 @@ namespace GLRhi
                 float dSz = 0.2f;
                 int nCols = 5;
 
-                for (int i = 0; i < 20; ++i)
+                for (size_t i = 0; i < instanceCount; ++i)
                 {
                     InstanceTexData instance{};
 

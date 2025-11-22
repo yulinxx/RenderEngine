@@ -29,7 +29,7 @@ namespace GLRhi
         // 生成测试用纹理数据
         std::vector<TextureData> genTextureData();
         // 生成测试用实例化纹理数据
-        std::vector<InstanceTexData> genInstanceTextureData(GLuint &tex, int &count);
+        std::vector<InstanceTexData> genInstanceTextureData(GLuint &tex, int &count, size_t instanceCount =20);
 
         // 清理资源
         void cleanup();
@@ -39,9 +39,9 @@ namespace GLRhi
         QOpenGLFunctions_3_3_Core *m_gl = nullptr;
 
         std::vector<TriangleData> genBlendTestTriangleData();
-        std::vector<TriangleData> genRandomTriangleData();
+        std::vector<TriangleData> genRandomTriangleData(size_t count = 10);
         std::vector<TextureData> genFileTextureData();
-        std::vector<TextureData> genRandomTextureData();
+        std::vector<TextureData> genRandomTextureData(size_t count = 10);
     };
 }
 
