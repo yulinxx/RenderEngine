@@ -1,8 +1,11 @@
 #include "Render/RenderDataManager.h"
 #include <vector>
 #include <QDebug>
-
 #include "FakeData/FakeDataProvider.h"
+#include "FakeData/FakePolyLineData.h"
+#include <algorithm>
+#include <random>
+#include <cstdlib>
 
 namespace GLRhi
 {
@@ -36,60 +39,84 @@ namespace GLRhi
 
     void RenderDataManager::setLineDatasCRUD()
     {
-        // 1. 删除部分数据
-        std::vector<PolylineData> vLinesToRemove;
-        for (const auto& line : m_vPolylineDatas)
+        if (m_vPolylineDatas.empty())
+            return;
+
+        // 1. 随机删除20%的图元
+        size_t removeCount = static_cast<size_t>(m_vPolylineDatas.size() * 0.2f);
+        if (removeCount > 0)
         {
-           if (line.id % 20 == 1)
-           {
-               vLinesToRemove.push_back(line);
-           }
+            // 随机打乱索引
+            std::vector<size_t> indices(m_vPolylineDatas.size());
+            for (size_t i = 0; i < m_vPolylineDatas.size(); ++i)
+                indices[i] = i;
+            
+            std::shuffle(indices.begin(), indices.end(), std::default_random_engine(std::rand()));
+            
+            // 保留不需要删除的索引
+            std::vector<PolylineData> newPolylineDatas;
+            newPolylineDatas.reserve(m_vPolylineDatas.size() - removeCount);
+            
+            for (size_t i = removeCount; i < indices.size(); ++i)
+                newPolylineDatas.push_back(m_vPolylineDatas[indices[i]]);
+            
+            m_vPolylineDatas = std::move(newPolylineDatas);
         }
 
-        if (!vLinesToRemove.empty())
+        // 2. 修改15%的图元的顶点及颜色数据
+        size_t modifyCount = static_cast<size_t>(m_vPolylineDatas.size() * 0.15f);
+        if (modifyCount > 0)
         {
-           qDebug() << "Removed" << vLinesToRemove.size() << "line segments";
+            // 随机选择要修改的索引
+            std::vector<size_t> indices(m_vPolylineDatas.size());
+            for (size_t i = 0; i < m_vPolylineDatas.size(); ++i)
+                indices[i] = i;
+            
+            std::shuffle(indices.begin(), indices.end(), std::default_random_engine(std::rand()));
+            
+            // 修改选中的图元
+            for (size_t i = 0; i < modifyCount && i < indices.size(); ++i)
+            {
+                size_t idx = indices[i];
+                
+                // 修改顶点数据 - 随机偏移
+                for (size_t j = 0; j < m_vPolylineDatas[idx].verts.size(); j += 3)
+                {
+                    // 只修改x和y坐标，保持长度不变
+                    float offsetX = (static_cast<float>(std::rand()) / RAND_MAX - 0.5f) * 0.1f;
+                    float offsetY = (static_cast<float>(std::rand()) / RAND_MAX - 0.5f) * 0.1f;
+                    m_vPolylineDatas[idx].verts[j] += offsetX;
+                    m_vPolylineDatas[idx].verts[j + 1] += offsetY;
+                }
+                
+                // 修改颜色数据
+                float r = static_cast<float>(std::rand()) / RAND_MAX;
+                float g = static_cast<float>(std::rand()) / RAND_MAX;
+                float b = static_cast<float>(std::rand()) / RAND_MAX;
+
+                m_vPolylineDatas[idx].brush.setRgb(r, g, b);
+            }
         }
 
-        // 2. 修改部分数据
-        std::vector<PolylineData> linesToModify;
-        for (auto& line : m_vPolylineDatas)
+        // 3. 添加新数据 - 创建不固定数量的新线段，但确保总数不超过五百万
+        
+        // 设置最大值
+        const size_t MAX_TOTAL_COUNT = 5000000;
+        
+        // 计算还可以添加的最大数量（随机添加1到10条，但不超过最大值限制）
+        size_t currentCount = m_vPolylineDatas.size();
+        size_t availableSlots = MAX_TOTAL_COUNT > currentCount ? MAX_TOTAL_COUNT - currentCount : 0;
+        
+        if (availableSlots > 0)
         {
-           if (line.id % 2 == 0)
-           {
-               line.brush = { 0.0f, 0.0f, 1.0f, 1.0f, 0.0f };
-               linesToModify.push_back(line);
-           }
-        }
-        if (!linesToModify.empty())
-        {
-           modifyLines(linesToModify);
-           qDebug() << "修改了" << linesToModify.size() << "条偶数ID的线段数据，设置为蓝色";
-        }
+            FakeDataProvider fakeDataProvider;
+            std::vector<PolylineData> vPLineDatas = fakeDataProvider.genLineData(60);
+            m_vPolylineDatas.insert(m_vPolylineDatas.end(), vPLineDatas.begin(), vPLineDatas.end());
 
-        // 3. 添加新数据 - 创建2条新的线段
-        std::vector<PolylineData> linesToAdd;
-        
-        // 创建第一条新线段
-        PolylineData newLine1;
-        newLine1.id = -1; // 让系统自动分配ID或使用特殊ID标记
-        newLine1.verts = { -0.5f, -0.5f, 0.0f, 0.5f, 0.5f, 0.0f }; // 从(-0.5,-0.5)到(0.5,0.5)的线段
-        newLine1.count = { 2 }; // 2个顶点
-        newLine1.brush = { 1.0f, 0.0f, 0.0f, 1.0f, 0.0f }; // 红色
-        linesToAdd.push_back(newLine1);
-        
-        // 创建第二条新线段
-        PolylineData newLine2;
-        newLine2.id = -2; // 让系统自动分配ID或使用特殊ID标记
-        newLine2.verts = { 0.5f, -0.5f, 0.0f, -0.5f, 0.5f, 0.0f }; // 从(0.5,-0.5)到(-0.5,0.5)的线段
-        newLine2.count = { 2 }; // 2个顶点
-        newLine2.brush = { 0.0f, 1.0f, 0.0f, 1.0f, 0.0f }; // 绿色
-        linesToAdd.push_back(newLine2);
-        
-        if (!linesToAdd.empty())
+        }
+        else
         {
-           addLines(linesToAdd);
-           qDebug() << "添加了" << linesToAdd.size() << "条新的线段数据";
+            qDebug() << "已达到最大线段数量限制 (" << MAX_TOTAL_COUNT << ")，无法添加新线段";
         }
     }
 

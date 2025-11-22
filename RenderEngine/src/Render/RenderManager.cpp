@@ -280,7 +280,7 @@ namespace GLRhi
 
     void RenderManager::dataCRUD()
     {
-       
+        m_dataManager.setLineDatasCRUD();
     }
 
 }
