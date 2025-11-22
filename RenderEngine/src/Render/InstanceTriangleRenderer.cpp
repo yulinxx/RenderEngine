@@ -33,7 +33,6 @@ namespace GLRhi
         // 获取uniform位置
         m_program->bind();
         m_uCameraMatLoc = m_program->uniformLocation("uCameraMat");
-        //m_uDepthLoc = m_program->uniformLocation("uDepth");
 
         bool bUniformError = (m_uCameraMatLoc < 0);
         if (bUniformError)
@@ -158,10 +157,10 @@ namespace GLRhi
         }
 
         // 设置相机矩阵
-        float identity[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
         if (m_uCameraMatLoc >= 0)
         {
-            QMatrix4x4 mat(identity);
+            float identity[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+            QMatrix4x4 mat(cameraMat);
             m_program->setUniformValue(m_uCameraMatLoc, mat);
         }
 

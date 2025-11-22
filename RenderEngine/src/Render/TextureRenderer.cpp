@@ -154,12 +154,8 @@ namespace GLRhi
         m_gl->glEnable(GL_BLEND);
         m_gl->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        float identity[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
         if (m_uCameraMatLoc >= 0)
-        {
-            QMatrix4x4 mat(identity);
-            m_program->setUniformValue(m_uCameraMatLoc, mat);
-        }
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
 
         m_gl->glActiveTexture(GL_TEXTURE0);
         m_program->setUniformValue(m_uTexLoc, 0);

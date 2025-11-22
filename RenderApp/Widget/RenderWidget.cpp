@@ -4,16 +4,21 @@
 #include <QWheelEvent>
 #include <QDebug>
 #include <QImage>
+#include <cstdlib>
+#include <ctime>
 namespace GLRhi
 {
     RenderWidget::RenderWidget(QWidget* parent) : QOpenGLWidget(parent)
     {
+        // 初始化随机数种子
+        std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
         QSurfaceFormat format;
         format.setVersion(3, 3);
         format.setProfile(QSurfaceFormat::CoreProfile);
         format.setSamples(4); // 启用抗锯齿
         setFormat(format);
-        setMouseTracking(true); // 启用鼠标跟踪（无需按下也能触发move事件）
+        setMouseTracking(true);
     }
 
     RenderWidget::~RenderWidget()
@@ -51,9 +56,7 @@ namespace GLRhi
 
         // 初始化渲染管理器
         if (!m_renderManager.initialize(this))
-        {
             qFatal("Initialize render manager failed!");
-        }
 
         // 初始化相机矩阵
         m_camera.updateMatrix(size());
@@ -85,11 +88,7 @@ namespace GLRhi
         case Qt::Key_F1:
         {
             // F1：启用/关闭抗锯齿
-            makeCurrent();
-            m_bAntiAliasEnabled = !m_bAntiAliasEnabled;
-            (m_bAntiAliasEnabled) ?
-                glEnable(GL_MULTISAMPLE) : glDisable(GL_MULTISAMPLE);
-            update();
+            setAntiAliasEnabled(!m_bAntiAliasEnabled);
         }
         break;
         case Qt::Key_F2:
@@ -103,8 +102,50 @@ namespace GLRhi
         }
         break;
         case Qt::Key_F3:
-            // F3：留空实现
-            break;
+        {
+            // F3：使用随机数生成棋盘格颜色和大小
+            // 生成随机大小（范围：8-32）
+            int randomSize = 8 + std::rand() % 25; // 8到32之间的随机数
+            setCheckerboardSz(randomSize);
+
+            // 生成两个随机颜色
+            float r1 = static_cast<float>(std::rand()) / RAND_MAX;
+            float g1 = static_cast<float>(std::rand()) / RAND_MAX;
+            float b1 = static_cast<float>(std::rand()) / RAND_MAX;
+            float a1 = 1.0f; // 不透明
+
+            float r2 = static_cast<float>(std::rand()) / RAND_MAX;
+            float g2 = static_cast<float>(std::rand()) / RAND_MAX;
+            float b2 = static_cast<float>(std::rand()) / RAND_MAX;
+            float a2 = 1.0f; // 不透明
+
+            // 确保两个颜色有足够的对比度
+            float brightnessDiff = std::abs((r1 + g1 + b1) - (r2 + g2 + b2));
+            if (brightnessDiff < 0.5f)
+            {
+                // 如果对比度不够，调整第二个颜色使其更亮或更暗
+                float avgBrightness1 = (r1 + g1 + b1) / 3.0f;
+                if (avgBrightness1 > 0.5f)
+                {
+                    // 第一个颜色较亮，第二个颜色变暗
+                    r2 *= 0.3f;
+                    g2 *= 0.3f;
+                    b2 *= 0.3f;
+                }
+                else
+                {
+                    // 第一个颜色较暗，第二个颜色变亮
+                    r2 = 1.0f - r2 * 0.3f;
+                    g2 = 1.0f - g2 * 0.3f;
+                    b2 = 1.0f - b2 * 0.3f;
+                }
+            }
+
+            Brush brushA(r1, g1, b1, a1);
+            Brush brushB(r2, g2, b2, a2);
+            setShowCheckerboardColor(brushA, brushB);
+        }
+        break;
         case Qt::Key_F4:
             // F4：留空实现
             break;
@@ -189,6 +230,26 @@ namespace GLRhi
         update();
     }
 
+    void RenderWidget::setAntiAliasEnabled(bool enabled)
+    {
+        if (m_bAntiAliasEnabled != enabled)
+        {
+            m_bAntiAliasEnabled = enabled;
+            makeCurrent();
+            if (m_bAntiAliasEnabled)
+                glEnable(GL_MULTISAMPLE);
+            else
+                glDisable(GL_MULTISAMPLE);
+            doneCurrent();
+            update();
+        }
+    }
+
+    bool RenderWidget::isAntiAliasEnabled() const
+    {
+        return m_bAntiAliasEnabled;
+    }
+
     void RenderWidget::updateLineDataBuffer(float* data, size_t count, Brush color)
     {
         makeCurrent();
@@ -231,19 +292,22 @@ namespace GLRhi
 
     void RenderWidget::setShowCheckerboard(bool b)
     {
-        //m_renderManager.getCheckerboardRenderer().setVisible(b);
+        auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
+        board->setVisible(b);
         update();
     }
 
     void RenderWidget::setCheckerboardSz(int n)
     {
-        //m_renderManager.getCheckerboardRenderer().setSize(static_cast<float>(n));
+        auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
+        board->setSize(static_cast<float>(n));
         update();
     }
 
-    void RenderWidget::setShowCheckerboardColor(Brush colorA, Brush colorB)
+    void RenderWidget::setShowCheckerboardColor(Brush brushA, Brush brushB)
     {
-        //m_renderManager.getCheckerboardRenderer().setColors(colorA, colorB);
+        auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
+        board->setColors(brushA.getColor(), brushB.getColor());
         update();
     }
 
@@ -258,7 +322,7 @@ namespace GLRhi
         makeCurrent();
         m_renderManager.cleanup();
         m_renderManager.initialize(this);
-        m_camera = MarchCamera();
+        m_camera = Camera();
         m_camera.updateMatrix(size());
         doneCurrent();
         update();

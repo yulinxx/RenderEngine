@@ -1,11 +1,11 @@
-#include "FakeData/FakeDataGenerator.h"
+#include "FakeData/FakeDataBase.h"
 
 // 初始化static成员变量
-std::mt19937 GLRhi::FakeDataGenerator::m_generator;
+std::mt19937 GLRhi::FakeDataBase::m_generator;
 
 namespace GLRhi
 {
-    FakeDataGenerator::FakeDataGenerator()
+    FakeDataBase::FakeDataBase()
     {
         try
         {
@@ -17,7 +17,7 @@ namespace GLRhi
         }
     }
 
-    void FakeDataGenerator::setRange(float xMin, float xMax, float yMin, float yMax)
+    void FakeDataBase::setRange(float xMin, float xMax, float yMin, float yMax)
     {
         m_xMin = xMin;
         m_xMax = xMax;
@@ -25,7 +25,7 @@ namespace GLRhi
         m_yMax = yMax;
     }
 
-    float FakeDataGenerator::getRandomFloat(float min, float max)
+    float FakeDataBase::getRandomFloat(float min, float max)
     {
         if (min >= max)
         {
@@ -43,7 +43,7 @@ namespace GLRhi
         }
     }
 
-    int FakeDataGenerator::getRandomInt(int min, int max)
+    int FakeDataBase::getRandomInt(int min, int max)
     {
         if (min >= max)
         {
@@ -61,7 +61,7 @@ namespace GLRhi
         }
     }
 
-    Color FakeDataGenerator::genRandomColor()
+    Color FakeDataBase::genRandomColor()
     {
         float r = getRandomFloat(0.0f, 1.0f);
         float g = getRandomFloat(0.0f, 1.0f);

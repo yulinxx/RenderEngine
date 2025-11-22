@@ -5,13 +5,12 @@ const char* baseLineVS = R"(
 
 layout(location = 0) in vec3 aPos;
 
-uniform mat4 uMVP;  // Model-View-Projection矩阵
+uniform mat4 uCameraMat;
 uniform float uDepth = 0.0f;
 
 void main()
 {
-    // 使用MVP矩阵进行坐标变换
-    gl_Position = uMVP * vec4(aPos.xy, uDepth, 1.0);
+    gl_Position = vec4(aPos.xy, uDepth, 1.0) * uCameraMat;
 }
 
 )";

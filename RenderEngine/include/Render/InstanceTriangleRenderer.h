@@ -8,16 +8,6 @@
 
 namespace GLRhi
 {
-    // 实例化三角形数据结构
-    struct InstanceTriangleData
-    {
-        float pos1[3];    // 三角形第一个顶点位置
-        float pos2[3];    // 三角形第二个顶点位置
-        float pos3[3];    // 三角形第三个顶点位置
-        float color[4];   // 三角形颜色 (RGBA)
-        float depth;      // 深度值
-    };
-
     class GLRENDER_EXPORT InstanceTriangleRenderer : public IRenderer
     {
     public:

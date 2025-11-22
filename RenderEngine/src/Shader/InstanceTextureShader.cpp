@@ -19,7 +19,7 @@ const char* chInstanceVS = R"(
 
         void main() {
             vec2 worldPos = aPosition * aInstanceSize + aInstancePos;
-            gl_Position = uCameraMat * vec4(worldPos, 0.0, 1.0);
+            gl_Position = vec4(worldPos, 0.0, 1.0) * uCameraMat;
 
             v_TexCoord = aTexCoord;
             v_Layer = aInstanceLayer;

@@ -38,7 +38,6 @@ namespace GLRhi
         m_uCellSizeLoc = m_program->uniformLocation("uCellSize");
         m_uLightColorLoc = m_program->uniformLocation("uLightColor");
         m_uDarkColorLoc = m_program->uniformLocation("uDarkColor");
-        m_nCameraMatLoc = m_program->uniformLocation("uMVP");
 
         bool bUniformError = (m_uCellSizeLoc < 0) || (m_uLightColorLoc < 0) || (m_uDarkColorLoc < 0);
         if (bUniformError)
@@ -76,7 +75,7 @@ namespace GLRhi
         return true;
     }
 
-    void CheckerboardRenderer::render(const float* mvpMatrix)
+    void CheckerboardRenderer::render(const float* cameraMat)
     {
         if (!m_gl || !m_program || !m_bVisible || !m_nVao)
             return;
@@ -87,8 +86,6 @@ namespace GLRhi
         const QVector3D lightColor(m_colorA.r(), m_colorA.g(), m_colorA.b());
         const QVector3D darkColor(m_colorB.r(), m_colorB.g(), m_colorB.b());
 
-        if (m_nCameraMatLoc >= 0)
-            m_program->setUniformValue(m_nCameraMatLoc, QMatrix4x4(mvpMatrix));
         if (m_uCellSizeLoc >= 0)
             m_program->setUniformValue(m_uCellSizeLoc, m_uBoardSize);
         if (m_uLightColorLoc >= 0)

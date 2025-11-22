@@ -2,11 +2,11 @@
 #define FAKE_TRIANGLE_DATA_H
 
 #include <vector>
-#include "FakeData/FakeDataGenerator.h"
+#include "FakeData/FakeDataBase.h"
 
 namespace GLRhi
 {
-    class FakeTriangleData : public FakeDataGenerator
+    class FakeTriangleData : public FakeDataBase
     {
     public:
         FakeTriangleData();

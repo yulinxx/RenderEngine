@@ -1,7 +1,54 @@
 # C++ 测试项目
 
 ## 项目概述
-本项目包含基础的C++ OpenGL代码，用于学习练习
+RenderEngine 是一个基于 OpenGL 的 C++ 渲染引擎项目，主要用于图形渲染和 CAD 应用程序开发。该项目采用模块化架构，分为核心渲染引擎库和应用程序两大部分。
+
+## 项目结构
+### 1. RenderEngine
+核心渲染引擎库，提供各种渲染功能和组件：
+
+- Common : 包含基础组件如相机控制、颜色处理、纹理加载等
+- Render : 实现多种渲染器，如线条渲染器、三角形渲染器、图像渲染器等
+- Shader : 各种着色器实现，支持不同类型的渲染效果
+- FakeData : 提供测试数据生成功能，用于渲染测试
+### 2. RenderApp
+使用渲染引擎的应用程序：
+
+- Widget : 包含 UI 组件，如 RenderWidget（渲染控件）、ViewWrapper（视图包装器）等
+- main.cpp : 应用程序入口点
+## 核心功能
+1. 多种渲染器支持 ：
+   - 线条渲染（LineRenderer、LineBRenderer、InstanceLineRenderer）
+   - 三角形渲染（TriangleRenderer、InstanceTriangleRenderer）
+   - 图像渲染（ImageRenderer、TextureRenderer、InstanceTextureRenderer）
+   - 棋盘格背景渲染（CheckerboardRenderer）
+2. 交互功能 ：
+   
+   - 相机控制（平移、缩放）
+   - 鼠标事件处理
+   - 键盘事件处理
+3. 渲染设置 ：
+   
+   - 背景颜色设置
+   - 抗锯齿控制
+   - 线框模式支持
+4. 数据管理 ：
+   
+   - 渲染数据缓冲区更新
+   - 实例化数据支持
+   - 测试数据生成
+5. 其他功能 ：
+   
+   - 截图功能
+   - 视图范围控制
+   - OpenGL 错误检查
+## 技术栈
+- 编程语言 : C++17
+- 图形 API : OpenGL 3.3 Core Profile
+- GUI 框架 : Qt5
+- 构建系统 : CMake
+- 依赖管理 : VCPKG
+- 主要依赖库 : OpenGL、Qt、Boost、Eigen3、stb 等
 
 ## 环境配置
 使用VCPKG安装依赖库：

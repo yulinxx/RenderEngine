@@ -165,12 +165,9 @@ namespace GLRhi
         //         : QMatrix4x4();
         //     m_program->setUniformValue(m_cameraMatLoc, mat);
         // }
-        float identity[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+
         if (m_uCameraMatLoc >= 0)
-        {
-            QMatrix4x4 mat(identity);
-            m_program->setUniformValue(m_uCameraMatLoc, mat);
-        }
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
 
         if (m_uTexArrayLoc >= 0)
         {

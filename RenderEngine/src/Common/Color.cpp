@@ -98,18 +98,53 @@ namespace GLRhi
         return result;
     }
 
-    float Color::getRed() const { return m_arrColor[RED]; }
-    float Color::r() const { return m_arrColor[RED]; }
-    float Color::getGreen() const { return m_arrColor[GREEN]; }
-    float Color::g() const { return m_arrColor[GREEN]; }
-    float Color::getBlue() const { return m_arrColor[BLUE]; }
-    float Color::b() const { return m_arrColor[BLUE]; }
-    float Color::getAlpha() const { return m_arrColor[ALPHA]; }
-    float Color::a() const { return m_arrColor[ALPHA]; }
+    float Color::getRed() const
+    {
+        return m_arrColor[RED];
+    }
+    float Color::r() const
+    {
+        return m_arrColor[RED];
+    }
+    float Color::getGreen() const
+    {
+        return m_arrColor[GREEN];
+    }
+    float Color::g() const
+    {
+        return m_arrColor[GREEN];
+    }
+    float Color::getBlue() const
+    {
+        return m_arrColor[BLUE];
+    }
+    float Color::b() const
+    {
+        return m_arrColor[BLUE];
+    }
+    float Color::getAlpha() const
+    {
+        return m_arrColor[ALPHA];
+    }
+    float Color::a() const
+    {
+        return m_arrColor[ALPHA];
+    }
 
-    void Color::setRed(float red) { m_arrColor[RED] = red; }
-    void Color::setGreen(float green) { m_arrColor[GREEN] = green; }
-    void Color::setBlue(float blue) { m_arrColor[BLUE] = blue; }
-    void Color::setAlpha(float alpha) { m_arrColor[ALPHA] = alpha; }
-
+    void Color::setRed(float red)
+    {
+        m_arrColor[RED] = red;
+    }
+    void Color::setGreen(float green)
+    {
+        m_arrColor[GREEN] = green;
+    }
+    void Color::setBlue(float blue)
+    {
+        m_arrColor[BLUE] = blue;
+    }
+    void Color::setAlpha(float alpha)
+    {
+        m_arrColor[ALPHA] = alpha;
+    }
 } // namespace GLRhi

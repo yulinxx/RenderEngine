@@ -55,7 +55,8 @@ namespace GLRhi
 
         m_program->bind();
         if (m_uCameraMatLoc >= 0)
-            m_program->setUniformValue(m_uCameraMatLoc, QMatrix3x3(cameraMat));
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
+
         if (m_uDepthLoc >= 0)
             m_program->setUniformValue(m_uDepthLoc, m_dDepth);
 

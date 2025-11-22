@@ -32,7 +32,7 @@ namespace GLRhi
 
         m_program->bind();
 
-        m_uCameraMatLoc = m_program->uniformLocation("uMVP");
+        m_uCameraMatLoc = m_program->uniformLocation("uCameraMat");
         m_uDepthLoc = m_program->uniformLocation("uDepth");
         m_uColorLoc = m_program->uniformLocation("uColor");
 
@@ -149,12 +149,8 @@ namespace GLRhi
             m_gl->glDisable(GL_BLEND);
         }
 
-        float identity[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
         if (m_uCameraMatLoc >= 0)
-        {
-            QMatrix4x4 mat(identity);
-            m_program->setUniformValue(m_uCameraMatLoc, mat);
-        }
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
 
         for (const auto& batch : m_vecBatches)
         {

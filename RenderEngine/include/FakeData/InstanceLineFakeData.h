@@ -2,8 +2,8 @@
 #define INSTANCE_LINE_FAKE_DATA_H
 
 #include <vector>
-#include "FakeDataGenerator.h"
-#include "Render/InstanceLineRenderer.h"
+#include "FakeDataBase.h"
+#include "Render/RenderCommon.h"
 #include "Common/Color.h"
 
 namespace GLRhi
@@ -11,7 +11,7 @@ namespace GLRhi
     /**
      * @brief 实例化线段伪数据生成类
      */
-    class InstanceLineFakeData final : public FakeDataGenerator
+    class InstanceLineFakeData final : public FakeDataBase
     {
     public:
         InstanceLineFakeData();
@@ -30,7 +30,7 @@ namespace GLRhi
          * @brief 获取生成的实例化线段数据
          * @return 实例化线段数据数组
          */
-        const std::vector<InstanceLineData>& getInstanceData() const;
+        std::vector<InstanceLineData>& getInstanceData();
 
         /**
          * @brief 清空数据
@@ -45,8 +45,6 @@ namespace GLRhi
          * @return 实例化线段数据
          */
         InstanceLineData genSingleLine(float minWidth, float maxWidth);
-
-
 
     private:
         std::vector<InstanceLineData> m_instanceData; // 实例化线段数据

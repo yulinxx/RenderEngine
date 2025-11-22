@@ -2,7 +2,7 @@
 #define INSTANCE_TRIANGLE_FAKE_DATA_H
 
 #include <vector>
-#include "FakeDataGenerator.h"
+#include "FakeDataBase.h"
 #include "Render/InstanceTriangleRenderer.h"
 #include "Common/Color.h"
 
@@ -11,7 +11,7 @@ namespace GLRhi
     /**
      * @brief 实例化三角形伪数据生成类
      */
-    class InstanceTriangleFakeData final : public FakeDataGenerator
+    class InstanceTriangleFakeData final : public FakeDataBase
     {
     public:
         InstanceTriangleFakeData();
@@ -45,8 +45,6 @@ namespace GLRhi
          * @return 实例化三角形数据
          */
         InstanceTriangleData genSingleTriangle(float minSize, float maxSize);
-
-
 
     private:
         std::vector<InstanceTriangleData> m_instanceData; // 实例化三角形数据

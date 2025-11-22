@@ -23,7 +23,7 @@ namespace GLRhi
         }
     }
 
-    const std::vector<InstanceLineData>& InstanceLineFakeData::getInstanceData() const
+    std::vector<InstanceLineData>& InstanceLineFakeData::getInstanceData()
     {
         return m_instanceData;
     }
@@ -67,6 +67,4 @@ namespace GLRhi
 
         return lineData;
     }
-
-
 }

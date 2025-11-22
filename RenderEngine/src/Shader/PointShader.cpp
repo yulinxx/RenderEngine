@@ -12,7 +12,7 @@ uniform float uDepth;
 
 void main()
 {
-    vec3 pos = uCameraMat * vec3(aPos, 1.0);
+    vec3 pos = vec3(aPos, 1.0) * uCameraMat;
     vec3 offset = uOffsetCamera * vec3(aOffset, 1.0) - uOffsetCamera * vec3(0.0, 0.0, 1.0);
     pos += offset;
 

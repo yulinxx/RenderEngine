@@ -58,7 +58,8 @@ namespace GLRhi
         if (!m_gl || !m_program) return;
 
         m_program->bind();
-        m_program->setUniformValue(m_uCameraMatLoc, QMatrix3x3(cameraMat));
+        if (m_uCameraMatLoc >= 0)
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
 
         for (auto& lineBInfo : m_lineBInfos)
         {

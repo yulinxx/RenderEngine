@@ -1,5 +1,5 @@
-#ifndef FAKE_DATA_GENERATOR_H
-#define FAKE_DATA_GENERATOR_H
+#ifndef FAKE_DATA_BASE_H
+#define FAKE_DATA_BASE_H
 
 #include <random>
 #include <vector>
@@ -10,11 +10,11 @@ namespace GLRhi
     /**
      * @brief 测试伪数据生成器基类
      */
-    class FakeDataGenerator
+    class FakeDataBase
     {
     public:
-        FakeDataGenerator();
-        virtual ~FakeDataGenerator() = default;
+        FakeDataBase();
+        virtual ~FakeDataBase() = default;
 
         /**
          * @brief 设置XY坐标范围
@@ -64,4 +64,4 @@ namespace GLRhi
     };
 }
 
-#endif // FAKE_DATA_GENERATOR_H
+#endif // FAKE_DATA_BASE_H

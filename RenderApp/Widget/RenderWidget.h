@@ -4,7 +4,7 @@
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
 
-#include "Common/MarchCamera.h"
+#include "Common/Camera.h"
 #include "Render/RenderManager.h"
 #include "Render/RenderCommon.h"
 
@@ -20,11 +20,9 @@ namespace GLRhi
         // 背景颜色设置
         void setBackgroundColor(const float r, const float g, const float b);
 
-        // 深度设置接口
-        //void setLineDepth(float depth);
-        //void setLineBDepth(float depth);
-        //void setFillDepth(float depth);
-        //void setImgDepth(float depth);
+        // 抗锯齿控制
+        void setAntiAliasEnabled(bool enabled);
+        bool isAntiAliasEnabled() const;
 
         // 线段数据更新
         void updateLineDataBuffer(float* data, size_t count, Brush color = Brush{});
@@ -44,7 +42,7 @@ namespace GLRhi
         // 棋盘格控制
         void setShowCheckerboard(bool b);
         void setCheckerboardSz(int n);
-        void setShowCheckerboardColor(Brush colorA, Brush colorB);
+        void setShowCheckerboardColor(Brush brushA, Brush brushB);
 
         // 视图控制
         void zoomToRange(float minX, float minY, float maxX, float maxY);
@@ -66,6 +64,7 @@ namespace GLRhi
     public:
         void keyPressEvent(QKeyEvent* event) override;
         void keyReleaseEvent(QKeyEvent* event) override;
+
     protected:
         void mousePressEvent(QMouseEvent* event) override;
         void mouseReleaseEvent(QMouseEvent* event) override;
@@ -73,17 +72,16 @@ namespace GLRhi
         void wheelEvent(QWheelEvent* event) override;
 
     private:
-        // 检查OpenGL错误
         void checkGLError(const QString& context = "");
 
-        // 内部成员
-        MarchCamera m_camera;             // 相机控制器
-        RenderManager m_renderManager;    // 渲染管理器
-        GetMousePtCb m_mouseCb = nullptr; // 鼠标位置回调
-        QPointF m_lastMousePos;           // 鼠标按下位置
-        bool m_bDragging = false;         // 拖动状态标记
-        bool m_bAntiAliasEnabled = true;  // 抗锯齿启用状态
-        bool m_bWireframeMode = false;    // 线框模式状态
+    private:
+        Camera m_camera;                    // 相机控制器
+        RenderManager m_renderManager;      // 渲染管理器
+        GetMousePtCb m_mouseCb = nullptr;   // 鼠标位置回调
+        QPointF m_lastMousePos;             // 鼠标按下位置
+        bool m_bDragging = false;           // 拖动状态标记
+        bool m_bAntiAliasEnabled = true;    // 抗锯齿启用状态
+        bool m_bWireframeMode = false;      // 线框模式状态
     };
 }
 #endif // RENDER_WIDGET_H

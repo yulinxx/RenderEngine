@@ -79,6 +79,7 @@ namespace GLRhi
 
         m_gl->glDisable(GL_CULL_FACE);
         m_program->bind();
+
         if (m_uCameraMatLoc >= 0)
             m_program->setUniformValue(m_uCameraMatLoc, QMatrix3x3(cameraMat));
 

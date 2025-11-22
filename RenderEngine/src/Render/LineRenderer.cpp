@@ -33,7 +33,7 @@ namespace GLRhi
 
         m_uColorLoc = m_program->uniformLocation("uColor");
         m_uDepthLoc = m_program->uniformLocation("uDepth");
-        m_nCameraMatLoc = m_program->uniformLocation("uMVP");
+        m_nCameraMatLoc = m_program->uniformLocation("uCameraMat");
 
         bool bUniformError = (m_uColorLoc < 0) || (m_uDepthLoc < 0);
         if (bUniformError)
@@ -54,7 +54,7 @@ namespace GLRhi
         return true;
     }
 
-    void LineRenderer::render(const float* mvpMatrix)
+    void LineRenderer::render(const float* cameraMat)
     {
         if (m_nVao == 0 || m_nVbo == 0 || m_nEbo == 0 ||
             m_vPlineBrush.empty() || m_vIndexCounts.empty() || m_vIndexOffsets.empty())
@@ -71,10 +71,9 @@ namespace GLRhi
 
         m_program->bind();
 
-        if (m_nCameraMatLoc >= 0)
-        {
-            m_program->setUniformValue(m_nCameraMatLoc, QMatrix4x4(mvpMatrix));
-        }
+        if (m_uCameraMatLoc >= 0)
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
+
         m_gl->glEnable(GL_PRIMITIVE_RESTART);
         m_gl->glPrimitiveRestartIndex(0xFFFFFFFF);
 

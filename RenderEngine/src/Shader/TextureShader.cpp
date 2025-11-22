@@ -10,7 +10,7 @@ const char* chTextureVS = R"(
         uniform float uDepth;
 
         void main() {
-            gl_Position = uCameraMat * vec4(aPosition, (1 - uDepth) / 2.0f, 1.0);
+            gl_Position = vec4(aPosition, (1 - uDepth) / 2.0f, 1.0) * uCameraMat;
             v_TexCoord = aTexCoord;
         }
 )";

@@ -167,7 +167,7 @@ namespace GLRhi
             m_lineProgram->setUniformValue("scale", m_scale);
 
             glBindVertexArray(m_lineVao);
-            glDrawArrays(GL_LINE_STRIP, 0, m_linePoints.size());
+            glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(m_linePoints.size()));
             glBindVertexArray(0);
             m_lineProgram->release();
         }
@@ -175,7 +175,7 @@ namespace GLRhi
         if (m_crossPoints.size() >= 2 && m_crossProgram->bind())
         {
             glBindVertexArray(m_crossVao);
-            glDrawArrays(GL_LINES, 0, m_crossPoints.size());
+            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_crossPoints.size()));
             glBindVertexArray(0);
             m_crossProgram->release();
         }
@@ -183,7 +183,7 @@ namespace GLRhi
         if (m_rulerLines.size() >= 1 && m_rulerProgram->bind())
         {
             glBindVertexArray(m_rulerVao);
-            glDrawArrays(GL_LINES, 0, m_rulerLines.size() * 2);
+            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_rulerLines.size() * 2));
             glBindVertexArray(0);
             m_rulerProgram->release();
         }

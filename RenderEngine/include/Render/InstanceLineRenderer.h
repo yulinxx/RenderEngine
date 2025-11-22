@@ -8,15 +8,6 @@
 
 namespace GLRhi
 {
-    // 实例化线段数据结构
-    struct InstanceLineData
-    {
-        float pos1[3];    // 线段第一个端点位置
-        float pos2[3];    // 线段第二个端点位置
-        float color[4];   // 线段颜色 (RGBA)
-        float width;      // 线段宽度
-        float depth;      // 深度值
-    };
 
     class GLRENDER_EXPORT InstanceLineRenderer : public IRenderer
     {

@@ -13,7 +13,7 @@ uniform float uDepth = 0.0;
 
 void main() {
     vec3 pos = vec3(aPosition, (1.0 - uDepth) / 2.0);
-    vec3 transformed = uCameraMat * pos;
+    vec3 transformed = pos * uCameraMat;
     gl_Position = vec4(transformed.x, transformed.y, transformed.z, 1.0);
 
     v_TexCoord = aTexCoord;

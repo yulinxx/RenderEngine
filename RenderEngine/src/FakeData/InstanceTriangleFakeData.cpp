@@ -59,7 +59,7 @@ namespace GLRhi
         triangleData.pos3[2] = 0.0f;
 
         // 生成随机颜色
-        Color color = FakeDataGenerator::genRandomColor();
+        Color color = FakeDataBase::genRandomColor();
         triangleData.color[0] = color.getRed();
         triangleData.color[1] = color.getGreen();
         triangleData.color[2] = color.getBlue();
@@ -70,6 +70,4 @@ namespace GLRhi
 
         return triangleData;
     }
-
-
 }

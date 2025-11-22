@@ -3,13 +3,13 @@
 
 #include <vector>
 #include <QOpenGLFunctions_3_3_Core>
-#include "FakeData/FakeDataGenerator.h"
+#include "FakeData/FakeDataBase.h"
 
 namespace GLRhi
 {
     struct TextureData;
 
-    class FakeTextureData : public FakeDataGenerator
+    class FakeTextureData : public FakeDataBase
     {
     public:
         FakeTextureData();

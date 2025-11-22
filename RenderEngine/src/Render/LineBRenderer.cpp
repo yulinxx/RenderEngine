@@ -61,21 +61,24 @@ namespace GLRhi
 
     void LineBRenderer::render(const float* cameraMat)
     {
-        if (!m_gl || !m_program) return;
+        if (!m_gl || !m_program)
+            return;
 
         m_program->bind();
-        m_program->setUniformValue(m_uCameraMatLoc, QMatrix3x3(cameraMat));
+        if (m_uCameraMatLoc >= 0)
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
 
         for (auto& lineBInfo : m_lineBInfos)
         {
             if (lineBInfo.vao && lineBInfo.vertexCount > 0)
             {
-                m_program->setUniformValue(m_uColorLoc, QVector4D(lineBInfo.color.r(), lineBInfo.color.g(), lineBInfo.color.b(), lineBInfo.color.a()));
+                m_program->setUniformValue(m_uColorLoc,
+                    QVector4D(lineBInfo.color.r(), lineBInfo.color.g(), lineBInfo.color.b(), lineBInfo.color.a()));
+
                 m_program->setUniformValue(m_uLineTypeLoc, lineBInfo.lineType);
                 m_program->setUniformValue(m_uDashScaleLoc, lineBInfo.dashScale);
                 m_program->setUniformValue(m_uThicknessLoc, lineBInfo.thickness);
-                if (m_uDepthLoc >= 0)
-                    m_program->setUniformValue(m_uDepthLoc, lineBInfo.color.d());
+                m_program->setUniformValue(m_uDepthLoc, lineBInfo.color.d());
 
                 m_gl->glBindVertexArray(lineBInfo.vao);
                 m_gl->glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(lineBInfo.vertexCount));

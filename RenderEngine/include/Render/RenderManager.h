@@ -14,11 +14,14 @@
 #include "InstanceLineRenderer.h"
 #include "InstanceTriangleRenderer.h"
 #include "RenderCommon.h"
-#include "FakeData/DataGenerator.h"
+
+#include "Render/RenderDataManager.h"
+
+#include "FakeData/FakeDataProvider.h"
 #include "FakeData/InstanceLineFakeData.h"
 #include "FakeData/InstanceTriangleFakeData.h"
-
 #include <QOpenGLFunctions_3_3_Core>
+
 #include <memory>
 
 namespace GLRhi
@@ -34,7 +37,7 @@ namespace GLRhi
         bool initialize(QOpenGLFunctions_3_3_Core* gl);
 
         // 渲染
-        void render(const float* mvpMatrix);
+        void render(const float* cameraMat);
 
         // 清理所有渲染器
         void cleanup();
@@ -57,6 +60,7 @@ namespace GLRhi
 
         // 生成测试数据，用于测试渲染
         void genFakeData();
+        void dataCRUD();
 
     private:
         QOpenGLFunctions_3_3_Core* m_gl{ nullptr };  // OpenGL函数指针
@@ -72,13 +76,15 @@ namespace GLRhi
         std::unique_ptr<IRenderer> m_instancTexRenderer{ nullptr };
         std::unique_ptr<IRenderer> m_instanceLineRenderer{ nullptr };
         std::unique_ptr<IRenderer> m_instanceTriangleRenderer{ nullptr };
-        
+
         // 实例化伪数据生成器
         std::unique_ptr<InstanceLineFakeData> m_instanceLineFakeData{ nullptr };
         std::unique_ptr<InstanceTriangleFakeData> m_instanceTriangleFakeData{ nullptr };
 
         // 数据生成器
-        std::unique_ptr<DataGenerator> m_dataGen{ nullptr };
+        std::unique_ptr<FakeDataProvider> m_dataGen{ nullptr };
+
+        RenderDataManager m_dataManager;
     };
 }
 #endif // RENDERMANAGER_H

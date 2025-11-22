@@ -2,11 +2,11 @@
 #define FAKE_POLYLINE_DATA_H
 
 #include <vector>
-#include "FakeDataGenerator.h"
+#include "FakeDataBase.h"
 
 namespace GLRhi
 {
-    class FakePolyLineData final : public FakeDataGenerator
+    class FakePolyLineData final : public FakeDataBase
     {
     public:
         FakePolyLineData();

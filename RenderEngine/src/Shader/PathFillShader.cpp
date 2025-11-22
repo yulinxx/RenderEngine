@@ -18,7 +18,7 @@ flat out int vLineType;
 
 void main()
 {
-    vec3 pos = uCameraMat * vec3(aPos, 1.0);
+    vec3 pos = vec3(aPos, 1.0) * uCameraMat;
     gl_Position = vec4(pos.xy, uDepth, 1.0);
 
     vLineType = uLineType;

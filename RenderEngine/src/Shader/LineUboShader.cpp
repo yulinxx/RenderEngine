@@ -5,7 +5,7 @@ const char* chLineUboVS = R"(
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in float aLineID;
 
-uniform mat4 uCameraMatrix;
+uniform mat4 uCameraMat;
 
 layout(std140) uniform LineDataUBO {
     vec4 colors[2048];
@@ -20,7 +20,7 @@ void main()
     int id = int(aLineID);
     vColor = colors[id];
     vDepth = depths[id];
-    gl_Position = uCameraMatrix * vec4(aPos.xy, (1 - vDepth) / 2.0f, 1.0);
+    gl_Position = vec4(aPos.xy, (1 - vDepth) / 2.0f, 1.0) * uCameraMat;
 }
 )";
 

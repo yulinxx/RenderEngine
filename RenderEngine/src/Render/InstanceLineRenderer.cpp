@@ -31,7 +31,6 @@ namespace GLRhi
 
         m_program->bind();
         m_uCameraMatLoc = m_program->uniformLocation("uCameraMat");
-        //m_uLineWidthLoc = m_program->uniformLocation("uLineWidth");
 
         bool bUniformError = (m_uCameraMatLoc < 0);
         if (bUniformError)
@@ -145,11 +144,10 @@ namespace GLRhi
         m_gl->glBindVertexArray(m_nVao);
 
         // 设置相机矩阵
-        float identity[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
         if (m_uCameraMatLoc >= 0)
         {
-            QMatrix4x4 mat(identity);
-            m_program->setUniformValue(m_uCameraMatLoc, mat);
+            //float identity[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
         }
 
         // 移除了不再需要的线宽uniform设置

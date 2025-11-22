@@ -33,7 +33,7 @@ namespace GLRhi
         }
 
         m_program->bind();
-        m_uCameraMatLoc = m_program->uniformLocation("uCameraMatrix");
+        m_uCameraMatLoc = m_program->uniformLocation("uCameraMat");
 
         bool bUniformError = (m_uCameraMatLoc < 0);
         if (bUniformError)
@@ -92,12 +92,8 @@ namespace GLRhi
             m_gl->glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_nUbo);
         }
 
-        float identity[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
         if (m_uCameraMatLoc >= 0)
-        {
-            QMatrix4x4 mat(identity);
-            m_program->setUniformValue(m_uCameraMatLoc, mat);
-        }
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
 
         m_gl->glDisable(GL_DEPTH_TEST);
         m_gl->glEnable(GL_LINE_SMOOTH);

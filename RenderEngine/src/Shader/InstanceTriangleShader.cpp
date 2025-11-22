@@ -33,7 +33,7 @@ namespace GLRhi
             finalPos.z = aInstanceDepth;
 
             // 应用相机矩阵
-            gl_Position = uCameraMat * vec4(finalPos, 1.0);
+            gl_Position = vec4(finalPos, 1.0) * uCameraMat;
 
             // 传递颜色到片段着色器
             vColor = aInstanceColor;
