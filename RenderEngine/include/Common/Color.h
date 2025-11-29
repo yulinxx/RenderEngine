@@ -87,7 +87,31 @@ namespace GLRhi
 
         uint32_t toUInt32() const;
         
-    private:
+        // 常用颜色静态常量
+        static const Color BLACK;
+        static const Color WHITE;
+        static const Color RED;
+        static const Color GREEN;
+        static const Color BLUE;
+        static const Color YELLOW;
+        static const Color CYAN;
+        static const Color MAGENTA;
+        static const Color GREY;
+        static const Color LIGHT_GREY;
+        static const Color DARK_GREY;
+        static const Color ORANGE;
+        static const Color PURPLE;
+        static const Color BROWN;
+        static const Color PINK;
+        static const Color LIME;
+        static const Color TEAL;
+        static const Color NAVY;
+        static const Color MAROON;
+        static const Color OLIVE;
+        static const Color SILVER;
+        static const Color TRANSPARENT;
+        
+private:
         float m_arrColor[COLOR_COUNT] = { 1.0f, 1.0f, 1.0f, 1.0f }; // RGBA颜色数组
     };
 }

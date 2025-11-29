@@ -62,15 +62,34 @@ namespace GLRhi
         if (!s_colorPool.empty())
             return;
 
-        s_colorPool.reserve(7);
+        s_colorPool.reserve(20);
 
-        s_colorPool.emplace_back(1.0f, 0.0f, 0.0f, 1.0f);
-        s_colorPool.emplace_back(0.0f, 1.0f, 0.0f, 1.0f);
-        s_colorPool.emplace_back(0.0f, 0.0f, 1.0f, 1.0f);
-        s_colorPool.emplace_back(1.0f, 1.0f, 0.0f, 1.0f);
-        s_colorPool.emplace_back(1.0f, 0.0f, 1.0f, 1.0f);
-        s_colorPool.emplace_back(0.0f, 1.0f, 1.0f, 1.0f);
-        //s_colorPool.emplace_back(1.0f, 1.0f, 1.0f, 1.0f);
+        // 基本颜色
+        s_colorPool.emplace_back(1.0f, 0.0f, 0.0f, 1.0f);     // 红色
+        s_colorPool.emplace_back(0.0f, 1.0f, 0.0f, 1.0f);     // 绿色
+        s_colorPool.emplace_back(0.0f, 0.0f, 1.0f, 1.0f);     // 蓝色
+        s_colorPool.emplace_back(1.0f, 1.0f, 0.0f, 1.0f);     // 黄色
+        s_colorPool.emplace_back(1.0f, 0.0f, 1.0f, 1.0f);     // 洋红色
+        s_colorPool.emplace_back(0.0f, 1.0f, 1.0f, 1.0f);     // 青色
+        //s_colorPool.emplace_back(1.0f, 1.0f, 1.0f, 1.0f);    // 白色
+        
+        // 灰色系列
+        s_colorPool.emplace_back(0.0f, 0.0f, 0.0f, 1.0f);     // 黑色
+        s_colorPool.emplace_back(0.5f, 0.5f, 0.5f, 1.0f);     // 灰色
+        s_colorPool.emplace_back(0.25f, 0.25f, 0.25f, 1.0f);  // 深灰色
+        s_colorPool.emplace_back(0.75f, 0.75f, 0.75f, 1.0f);  // 浅灰色
+        
+        // 其他常用颜色
+        s_colorPool.emplace_back(1.0f, 0.65f, 0.0f, 1.0f);    // 橙色
+        s_colorPool.emplace_back(0.5f, 0.0f, 0.5f, 1.0f);     // 紫色
+        s_colorPool.emplace_back(0.65f, 0.16f, 0.16f, 1.0f);  // 棕色
+        s_colorPool.emplace_back(1.0f, 0.75f, 0.8f, 1.0f);    // 粉色
+        s_colorPool.emplace_back(0.75f, 1.0f, 0.0f, 1.0f);    // 酸橙绿
+        s_colorPool.emplace_back(0.0f, 0.5f, 0.5f, 1.0f);     // 蓝绿色
+        s_colorPool.emplace_back(0.0f, 0.0f, 0.5f, 1.0f);     // 藏青色
+        s_colorPool.emplace_back(0.5f, 0.0f, 0.0f, 1.0f);     // 栗色
+        s_colorPool.emplace_back(0.5f, 0.5f, 0.0f, 1.0f);     // 橄榄绿
+        
     }
 
     Color FakeDataBase::genRandomColor()
