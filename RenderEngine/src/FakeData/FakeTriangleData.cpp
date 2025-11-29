@@ -94,10 +94,10 @@ namespace GLRhi
         m_vertices.push_back(depth);
 
         // 添加索引
-        unsigned int vertexCount = static_cast<unsigned int>(m_vertices.size() / 3);
+        unsigned int nVertexCount = static_cast<unsigned int>(m_vertices.size() / 3);
 
-        m_indices.push_back(vertexCount - 3);
-        m_indices.push_back(vertexCount - 2);
-        m_indices.push_back(vertexCount - 1);
+        m_indices.push_back(nVertexCount - 3);
+        m_indices.push_back(nVertexCount - 2);
+        m_indices.push_back(nVertexCount - 1);
     }
 }

@@ -1,5 +1,6 @@
 #include "FakeData/FakePolyLineData.h"
 #include <cmath>
+#include <QDebug>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -17,7 +18,7 @@ namespace GLRhi
         clear();
     }
 
-    void FakePolyLineData::generateLines(int lineCount, int minPoints, int maxPoints)
+    void FakePolyLineData::generateLines(size_t lineCount, size_t minPoints, size_t maxPoints)
     {
         if (minPoints < 2)
             minPoints = 2;
@@ -26,15 +27,17 @@ namespace GLRhi
         if (minPoints > maxPoints)
             minPoints = maxPoints;
 
-        // 清空之前的数据
         clear();
 
         // 生成指定数量的线段
-        for (int i = 0; i < lineCount; ++i)
+        for (size_t i = 0; i < lineCount; ++i)
         {
-            // 随机生成当前线段的点数
-            int pointCount = getRandomInt(minPoints, maxPoints);
+            int pointCount = getRandomInt(static_cast<int>(minPoints), static_cast<int>(maxPoints));
             generateSingleLine(pointCount);
+
+            //static size_t N = 3;
+            //generateSingleLine(N);
+            //N++;
         }
     }
 
@@ -54,8 +57,11 @@ namespace GLRhi
         m_lineInfos.clear();
     }
 
-    void FakePolyLineData::generateSingleLine(int pointCount)
+    void FakePolyLineData::generateSingleLine(int nPointSz)
     {
+        if (nPointSz < 2)
+            nPointSz = 2;
+
         // 生成线段的起始点
         float startX = getRandomFloat(m_xMin, m_xMax);
         float startY = getRandomFloat(m_yMin, m_yMax);
@@ -72,13 +78,22 @@ namespace GLRhi
         float angle = getRandomFloat(0.0f, static_cast<float>(2.0f * M_PI));
         float startZ = 0.0f;
 
+        auto clipXYZ = [this](float& x, float& y) {
+            x = std::clamp(x, -0.98f, 0.98f);
+            y = std::clamp(y, -0.98f, 0.98f);
+            };
+
         // 添加起始点到顶点数据
         m_vertices.push_back(startX);
         m_vertices.push_back(startY);
         m_vertices.push_back(startZ);
 
+        clipXYZ(startX, startY);
+
+        //qDebug() << "\n--- startX:" << startX << ", startY:" << startY;
+
         // 生成线段的其余点
-        for (int i = 1; i < pointCount; ++i)
+        for (int i = 1; i < nPointSz; ++i)
         {
             // 获取前一个点
             float prevX = m_vertices[m_vertices.size() - 3];
@@ -107,7 +122,7 @@ namespace GLRhi
             float newDist = distToCenter + moveDistance * (getRandomFloat(-0.5f, 1.5f) - 0.5f);
 
             // 确保距离在有效范围内
-            newDist = std::max(0.0f, std::min(maxRadius, newDist));
+            newDist = std::max(0.05f, std::min(maxRadius, newDist));
 
             // 计算新点坐标
             float nextX = centerX + newDist * std::cos(newAngle);
@@ -118,9 +133,13 @@ namespace GLRhi
             m_vertices.push_back(nextX);
             m_vertices.push_back(nextY);
             m_vertices.push_back(nextZ);
+
+            clipXYZ(nextX, nextY);
+
+            //qDebug() << "nextX:" << nextX << ", nextY:" << nextY;
         }
 
         // 记录当前线段的信息
-        m_lineInfos.push_back(pointCount);
+        m_lineInfos.push_back(nPointSz);
     }
 }

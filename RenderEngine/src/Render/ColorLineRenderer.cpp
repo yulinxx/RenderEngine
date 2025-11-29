@@ -161,7 +161,7 @@ namespace GLRhi
 
         for (const auto& polyline : polylines)
         {
-            size_t vertexSz = polyline.verts.size();
+            size_t vertexSz = polyline.vVerts.size();
             if (vertexSz % 3 != 0 || vertexSz == 0)
             {
                 qWarning() << "Invalid vertex data: size=" << vertexSz;
@@ -171,7 +171,7 @@ namespace GLRhi
             m_vPlineInfos.push_back(polyline);
 
             size_t vertexCount = vertexSz / 3;
-            vVertices.insert(vVertices.end(), polyline.verts.begin(), polyline.verts.end());
+            vVertices.insert(vVertices.end(), polyline.vVerts.begin(), polyline.vVerts.end());
 
             for (size_t i = 0; i < vertexCount; ++i)
                 m_vIndices.push_back(static_cast<GLuint>(nVertexOffset + i));

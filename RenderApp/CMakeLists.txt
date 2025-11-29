@@ -47,6 +47,14 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/RenderEngine/include
 )
 
+# 添加RenderEngine的库目录
+target_link_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_BINARY_DIR}/lib
+)
+
+# 确保RenderEngine库在当前项目之前构建
+add_dependencies(${PROJECT_NAME} RenderEngine)
+
 # 链接DLL和Qt库
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt5::Widgets

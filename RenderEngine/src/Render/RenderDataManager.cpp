@@ -1,11 +1,13 @@
 #include "Render/RenderDataManager.h"
-#include <vector>
-#include <QDebug>
 #include "FakeData/FakeDataProvider.h"
 #include "FakeData/FakePolyLineData.h"
+#include "DataManager/PolylinesVboManager.h"
+
+#include <vector>
 #include <algorithm>
 #include <random>
 #include <cstdlib>
+#include <QDebug>
 
 namespace GLRhi
 {
@@ -80,13 +82,13 @@ namespace GLRhi
                 size_t idx = indices[i];
                 
                 // 修改顶点数据 - 随机偏移
-                for (size_t j = 0; j < m_vPolylineDatas[idx].verts.size(); j += 3)
+                for (size_t j = 0; j < m_vPolylineDatas[idx].vVerts.size(); j += 3)
                 {
                     // 只修改x和y坐标，保持长度不变
                     float offsetX = (static_cast<float>(std::rand()) / RAND_MAX - 0.5f) * 0.1f;
                     float offsetY = (static_cast<float>(std::rand()) / RAND_MAX - 0.5f) * 0.1f;
-                    m_vPolylineDatas[idx].verts[j] += offsetX;
-                    m_vPolylineDatas[idx].verts[j + 1] += offsetY;
+                    m_vPolylineDatas[idx].vVerts[j] += offsetX;
+                    m_vPolylineDatas[idx].vVerts[j + 1] += offsetY;
                 }
                 
                 // 修改颜色数据
@@ -163,8 +165,8 @@ namespace GLRhi
         {
             // 假设通过顶点数据和颜色进行简单比较
             // 在实际应用中，应该有更精确的标识方式
-            if (existingLine.verts == line.verts && 
-                existingLine.count == line.count && 
+            if (existingLine.vVerts == line.vVerts && 
+                existingLine.vCount == line.vCount && 
                 existingLine.brush == line.brush)
             {
                 existingLine = line;
@@ -186,8 +188,8 @@ namespace GLRhi
         // 查找并删除指定的线段
         for (auto it = m_impl->m_lines.begin(); it != m_impl->m_lines.end(); ++it)
         {
-            if (it->verts == line.verts && 
-                it->count == line.count && 
+            if (it->vVerts == line.vVerts && 
+                it->vCount == line.vCount && 
                 it->brush == line.brush)
             {
                 m_impl->m_lines.erase(it);
@@ -219,8 +221,8 @@ namespace GLRhi
     {
         for (auto& existingTriangle : m_impl->m_triangles)
         {
-            if (existingTriangle.verts == triangle.verts && 
-                existingTriangle.indices == triangle.indices && 
+            if (existingTriangle.vVerts == triangle.vVerts &&
+                existingTriangle.vIndices == triangle.vIndices && 
                 existingTriangle.brush == triangle.brush)
             {
                 existingTriangle = triangle;
@@ -241,8 +243,8 @@ namespace GLRhi
     {
         for (auto it = m_impl->m_triangles.begin(); it != m_impl->m_triangles.end(); ++it)
         {
-            if (it->verts == triangle.verts && 
-                it->indices == triangle.indices && 
+            if (it->vVerts == triangle.vVerts &&
+                it->vIndices == triangle.vIndices && 
                 it->brush == triangle.brush)
             {
                 m_impl->m_triangles.erase(it);
@@ -274,8 +276,8 @@ namespace GLRhi
     {
         for (auto& existingTexture : m_impl->m_textures)
         {
-            if (existingTexture.verts == texture.verts && 
-                existingTexture.indices == texture.indices && 
+            if (existingTexture.vVerts == texture.vVerts && 
+                existingTexture.vIndices == texture.vIndices && 
                 existingTexture.tex == texture.tex && 
                 existingTexture.brush == texture.brush)
             {
@@ -289,8 +291,8 @@ namespace GLRhi
     {
         for (auto it = m_impl->m_textures.begin(); it != m_impl->m_textures.end(); ++it)
         {
-            if (it->verts == texture.verts && 
-                it->indices == texture.indices && 
+            if (it->vVerts == texture.vVerts && 
+                it->vIndices == texture.vIndices && 
                 it->tex == texture.tex && 
                 it->brush == texture.brush)
             {
@@ -323,8 +325,8 @@ namespace GLRhi
     {
         for (auto& existingLine : m_impl->m_instanceLines)
         {
-            if (existingLine.verts == instanceLine.verts && 
-                existingLine.count == instanceLine.count && 
+            if (existingLine.vVerts == instanceLine.vVerts && 
+                existingLine.vCount == instanceLine.vCount && 
                 existingLine.brush == instanceLine.brush)
             {
                 existingLine = instanceLine;
@@ -345,8 +347,8 @@ namespace GLRhi
     {
         for (auto it = m_impl->m_instanceLines.begin(); it != m_impl->m_instanceLines.end(); ++it)
         {
-            if (it->verts == instanceLine.verts && 
-                it->count == instanceLine.count && 
+            if (it->vVerts == instanceLine.vVerts && 
+                it->vCount == instanceLine.vCount && 
                 it->brush == instanceLine.brush)
             {
                 m_impl->m_instanceLines.erase(it);
@@ -378,8 +380,8 @@ namespace GLRhi
     {
         for (auto& existingTriangle : m_impl->m_instanceTriangles)
         {
-            if (existingTriangle.verts == instanceTriangle.verts && 
-                existingTriangle.indices == instanceTriangle.indices && 
+            if (existingTriangle.vVerts == instanceTriangle.vVerts &&
+                existingTriangle.vIndices == instanceTriangle.vIndices && 
                 existingTriangle.brush == instanceTriangle.brush)
             {
                 existingTriangle = instanceTriangle;
@@ -400,8 +402,8 @@ namespace GLRhi
     {
         for (auto it = m_impl->m_instanceTriangles.begin(); it != m_impl->m_instanceTriangles.end(); ++it)
         {
-            if (it->verts == instanceTriangle.verts && 
-                it->indices == instanceTriangle.indices && 
+            if (it->vVerts == instanceTriangle.vVerts && 
+                it->vIndices == instanceTriangle.vIndices && 
                 it->brush == instanceTriangle.brush)
             {
                 m_impl->m_instanceTriangles.erase(it);
@@ -433,8 +435,8 @@ namespace GLRhi
     {
         for (auto& existingTexture : m_impl->m_instanceTextures)
         {
-            if (existingTexture.verts == instanceTexture.verts && 
-                existingTexture.indices == instanceTexture.indices && 
+            if (existingTexture.vVerts == instanceTexture.vVerts && 
+                existingTexture.vIndices == instanceTexture.vIndices && 
                 existingTexture.tex == instanceTexture.tex && 
                 existingTexture.brush == instanceTexture.brush)
             {
@@ -456,8 +458,8 @@ namespace GLRhi
     {
         for (auto it = m_impl->m_instanceTextures.begin(); it != m_impl->m_instanceTextures.end(); ++it)
         {
-            if (it->verts == instanceTexture.verts && 
-                it->indices == instanceTexture.indices && 
+            if (it->vVerts == instanceTexture.vVerts && 
+                it->vIndices == instanceTexture.vIndices && 
                 it->tex == instanceTexture.tex && 
                 it->brush == instanceTexture.brush)
             {

@@ -17,18 +17,20 @@ find_package(Stb REQUIRED)
 
 # 分别收集不同目录下的源文件和头文件
 file(GLOB_RECURSE RENDER_SOURCES
-    "src/Render/*.cpp"
-    "src/Shader/*.cpp"
-    "src/Common/*.cpp"
-    "src/FakeData/*.cpp"
+"src/Common/*.cpp"
+"src/DataManager/*.cpp"
+"src/FakeData/*.cpp"
+"src/Render/*.cpp"
+"src/Shader/*.cpp"
 )
 
 file(GLOB_RECURSE RENDER_HEADERS
-    "include/Render/*.h"
-    "include/Shader/*.h"
-    "include/Common/*.h"
-    "include/FakeData/*.h"
-    "include/GLRenderExport.h"
+"include/Common/*.h"
+"include/DataManager/*.h"
+"include/GLRenderExport.h"
+"include/FakeData/*.h"
+"include/Shader/*.h"
+"include/Render/*.h"
 )
 
 # 为Visual Studio创建源代码过滤器

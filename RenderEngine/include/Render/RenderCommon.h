@@ -20,9 +20,10 @@ namespace GLRhi
     // 使用内存对齐优化的线段数据结构
     struct GLRENDER_EXPORT PolylineData
     {
-        long long id;                           // ID
-        std::vector<float> verts{};             //  x, y, len
-        std::vector<size_t> count;              // 线段顶点数
+        //long long id;                         // ID
+        std::vector<long long> vId;             // ID
+        std::vector<size_t> vCount;              // 线段顶点数
+        std::vector<float> vVerts{};             //  x, y, len
         Brush brush{ 0.0, 0.0, 0.0, 1.0, 0.0 }; // 渲染信息
 
         //// 构造函数确保数据一致性
@@ -51,8 +52,8 @@ namespace GLRhi
     struct GLRENDER_EXPORT TriangleData
     {
         long long id;                       // ID
-        std::vector<float> verts;           // x, y, len
-        std::vector<unsigned int> indices;  // 索引
+        std::vector<float> vVerts;           // x, y, len
+        std::vector<unsigned int> vIndices;  // 索引
         Brush brush;
     };
 
@@ -70,8 +71,8 @@ namespace GLRhi
     struct GLRENDER_EXPORT TextureData
     {
         long long id;                       // ID
-        std::vector<float> verts;           //  x, y, u, v
-        std::vector<unsigned int> indices;
+        std::vector<float> vVerts;           //  x, y, u, v
+        std::vector<unsigned int> vIndices;
         unsigned int tex;
         Brush brush;
     };

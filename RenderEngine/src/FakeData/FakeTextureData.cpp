@@ -122,14 +122,14 @@ namespace GLRhi
         TextureData texData;
 
         // 顶点数据：x, y, u, v
-        texData.verts = {
+        texData.vVerts = {
             left,  bottom, 0.0f, 0.0f,
             right, bottom, 1.0f, 0.0f,
             right, top,    1.0f, 1.0f,
             left,  top,    0.0f, 1.0f
         };
 
-        texData.indices = { 0, 1, 2, 0, 2, 3 };
+        texData.vIndices = { 0, 1, 2, 0, 2, 3 };
 
         texData.tex = textureId;
 

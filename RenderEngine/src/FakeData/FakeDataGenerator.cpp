@@ -1,7 +1,7 @@
 #include "FakeData/FakeDataBase.h"
 
-// 初始化static成员变量
 std::mt19937 GLRhi::FakeDataBase::m_generator;
+std::vector<GLRhi::Color> GLRhi::FakeDataBase::s_colorPool;
 
 namespace GLRhi
 {
@@ -28,9 +28,7 @@ namespace GLRhi
     float FakeDataBase::getRandomFloat(float min, float max)
     {
         if (min >= max)
-        {
             return min;
-        }
 
         try
         {
@@ -46,9 +44,7 @@ namespace GLRhi
     int FakeDataBase::getRandomInt(int min, int max)
     {
         if (min >= max)
-        {
             return min;
-        }
 
         try
         {
@@ -61,12 +57,28 @@ namespace GLRhi
         }
     }
 
+    void FakeDataBase::initializeColorPool()
+    {
+        if (!s_colorPool.empty())
+            return;
+
+        s_colorPool.reserve(7);
+
+        s_colorPool.emplace_back(1.0f, 0.0f, 0.0f, 1.0f);
+        s_colorPool.emplace_back(0.0f, 1.0f, 0.0f, 1.0f);
+        s_colorPool.emplace_back(0.0f, 0.0f, 1.0f, 1.0f);
+        s_colorPool.emplace_back(1.0f, 1.0f, 0.0f, 1.0f);
+        s_colorPool.emplace_back(1.0f, 0.0f, 1.0f, 1.0f);
+        s_colorPool.emplace_back(0.0f, 1.0f, 1.0f, 1.0f);
+        //s_colorPool.emplace_back(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+
     Color FakeDataBase::genRandomColor()
     {
-        float r = getRandomFloat(0.0f, 1.0f);
-        float g = getRandomFloat(0.0f, 1.0f);
-        float b = getRandomFloat(0.0f, 1.0f);
-        float a = getRandomFloat(0.8f, 1.0f); // Alpha值稍微高一些
-        return Color(r, g, b, a);
+        initializeColorPool();
+        //return s_colorPool[0];
+
+        int nIndex = getRandomInt(0, static_cast<int>(s_colorPool.size()) - 1);
+        return s_colorPool[nIndex];
     }
 }

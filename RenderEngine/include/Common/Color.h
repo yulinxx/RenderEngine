@@ -1,6 +1,9 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include "GLRenderExport.h"
+#include <cstdint>
+
 namespace GLRhi
 {
     /**
@@ -8,7 +11,7 @@ namespace GLRhi
      *
      * 封装了RGBA颜色的存储和操作，提供颜色创建、修改、混合等功能。
      */
-    class Color
+    class GLRENDER_EXPORT Color
     {
     public:
         enum ColorIndex
@@ -28,65 +31,30 @@ namespace GLRhi
          * @param alpha 透明度 (0.0-1.0)
          */
         Color(float red = 1.0f, float green = 1.0f, float blue = 1.0f, float alpha = 1.0f);
-
-        /**
-         * @brief 复制构造函数
-         * @param other 要复制的Color对象
-         */
         Color(const Color& other);
 
-        /**
-         * @brief 赋值运算符
-         * @param other 要赋值的Color对象
-         * @return 引用自身，支持链式调用
-         */
         Color& operator=(const Color& other);
-
-        /**
-         * @brief 相等运算符
-         * @param other 要比较的Color对象
-         * @return 如果所有颜色相等则返回true，否则返回false
-         */
         bool operator==(const Color& other) const;
-
-        /**
-         * @brief 不等运算符
-         * @param other 要比较的Color对象
-         * @return 如果颜色不相等则返回true，否则返回false
-         */
         bool operator!=(const Color& other) const;
+        bool operator<(const Color& other) const;
 
         /**
          * @brief 设置RGBA颜色值
-         * @param red 红色 (0.0-1.0)
-         * @param green 绿色 (0.0-1.0)
-         * @param blue 蓝色 (0.0-1.0)
-         * @param alpha 透明度 (0.0-1.0)，默认为1.0
          */
         void set(float red, float green, float blue, float alpha = 1.0f);
 
         /**
          * @brief 设置RGB颜色值（保持当前透明度）
-         * @param red 红色 (0.0-1.0)
-         * @param green 绿色 (0.0-1.0)
-         * @param blue 蓝色 (0.0-1.0)
          */
         void setRgb(float red, float green, float blue);
 
         /**
          * @brief 获取RGB颜色值
-         * @param red 用于存储红色的引用
-         * @param green 用于存储绿色的引用
-         * @param blue 用于存储蓝色的引用
          */
         void getRgb(float& red, float& green, float& blue) const;
 
         /**
          * @brief 获取RGBA颜色值
-         * @param red 用于存储红色的引用
-         * @param green 用于存储绿色的引用
-         * @param blue 用于存储蓝色的引用
-         * @param alpha 用于存储透明度的引用
          */
         void getRgba(float& red, float& green, float& blue, float& alpha) const;
 
@@ -117,6 +85,8 @@ namespace GLRhi
         void setBlue(float blue);
         void setAlpha(float alpha);
 
+        uint32_t toUInt32() const;
+        
     private:
         float m_arrColor[COLOR_COUNT] = { 1.0f, 1.0f, 1.0f, 1.0f }; // RGBA颜色数组
     };

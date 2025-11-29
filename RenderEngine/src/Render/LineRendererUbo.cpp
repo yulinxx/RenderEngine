@@ -129,7 +129,7 @@ namespace GLRhi
         size_t totalIndices = 0;
         for (const auto& p : polylines)
         {
-            for (size_t count_idx : p.count)
+            for (size_t count_idx : p.vCount)
             {
                 int count = static_cast<int>(count_idx);
                 if (count >= 2)
@@ -163,7 +163,7 @@ namespace GLRhi
         for (size_t groupID = 0; groupID < polylines.size(); ++groupID)
         {
             const auto& group = polylines[groupID];
-            if (group.count.empty()) continue;
+            if (group.vCount.empty()) continue;
 
             uboColors[groupID * 4 + 0] = group.brush.r();
             uboColors[groupID * 4 + 1] = group.brush.g();
@@ -172,7 +172,7 @@ namespace GLRhi
             uboDepths[groupID] = group.brush.d();
 
             int vertexIndexInGroup = 0;
-            for (size_t vertex_count_idx : group.count)
+            for (size_t vertex_count_idx : group.vCount)
             {
                 int lineVertexCount = static_cast<int>(vertex_count_idx);
                 if (lineVertexCount < 2)
@@ -197,11 +197,11 @@ namespace GLRhi
             }
 
             // 顶点：位置 + 所属线段组ID
-            for (size_t i = 0; i < group.verts.size() / 3; ++i)
+            for (size_t i = 0; i < group.vVerts.size() / 3; ++i)
             {
-                vertexData.push_back(group.verts[i * 3 + 0]);
-                vertexData.push_back(group.verts[i * 3 + 1]);
-                vertexData.push_back(group.verts[i * 3 + 2]);
+                vertexData.push_back(group.vVerts[i * 3 + 0]);
+                vertexData.push_back(group.vVerts[i * 3 + 1]);
+                vertexData.push_back(group.vVerts[i * 3 + 2]);
                 vertexData.push_back(static_cast<float>(groupID));
             }
         }

@@ -204,7 +204,7 @@ namespace GLRhi
         if (!m_dataGen)
         {
             m_dataGen = std::make_unique<FakeDataProvider>();
-            m_dataGen->initialize(m_gl);
+            m_dataGen->initialize();
         }
 
         static bool b = true;

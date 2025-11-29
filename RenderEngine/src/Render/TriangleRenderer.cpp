@@ -91,18 +91,18 @@ namespace GLRhi
         {
             Batch batch;
             batch.indexOffset = static_cast<unsigned int>(nTotalIndices);
-            batch.indexCount = static_cast<unsigned int>(triData.indices.size());
+            batch.indexCount = static_cast<unsigned int>(triData.vIndices.size());
             batch.brush = triData.brush;
             m_vecBatches.emplace_back(batch);
 
-            nTotalVertices += triData.verts.size() / 3;
-            nTotalIndices += triData.indices.size();
+            nTotalVertices += triData.vVerts.size() / 3;
+            nTotalIndices += triData.vIndices.size();
         }
 
         std::vector<float> allVertices;
         allVertices.reserve(nTotalVertices * 3);
         for (const auto& triData : vTriDatas)
-            allVertices.insert(allVertices.end(), triData.verts.begin(), triData.verts.end());
+            allVertices.insert(allVertices.end(), triData.vVerts.begin(), triData.vVerts.end());
 
         std::vector<unsigned int> allIndices;
         allIndices.reserve(nTotalIndices);
@@ -110,10 +110,10 @@ namespace GLRhi
         unsigned int vertexOffset = 0;
         for (const auto& triData : vTriDatas)
         {
-            for (unsigned int index : triData.indices)
+            for (unsigned int index : triData.vIndices)
                 allIndices.push_back(index + vertexOffset);
 
-            vertexOffset += static_cast<unsigned int>(triData.verts.size()) / 3;
+            vertexOffset += static_cast<unsigned int>(triData.vVerts.size()) / 3;
         }
 
         m_gl->glBindVertexArray(m_nVao);

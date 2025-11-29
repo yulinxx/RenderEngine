@@ -4,8 +4,10 @@
 #include <QWheelEvent>
 #include <QDebug>
 #include <QImage>
+
 #include <cstdlib>
 #include <ctime>
+
 namespace GLRhi
 {
     RenderWidget::RenderWidget(QWidget* parent) : QOpenGLWidget(parent)
@@ -45,7 +47,7 @@ namespace GLRhi
         glPrimitiveRestartIndex(0xFFFFFFFF);
 
         // 初始化抗锯齿状态
-        if (m_bAntiAliasEnabled)
+        if (m_bAntiAlias)
             glEnable(GL_MULTISAMPLE);
         else
             glDisable(GL_MULTISAMPLE);
@@ -88,7 +90,7 @@ namespace GLRhi
         case Qt::Key_F1:
         {
             // F1：启用/关闭抗锯齿
-            setAntiAliasEnabled(!m_bAntiAliasEnabled);
+            setAntiAliasEnabled(!m_bAntiAlias);
         }
         break;
         case Qt::Key_F2:
@@ -174,7 +176,7 @@ namespace GLRhi
     {
         if (event->button() == Qt::MiddleButton && m_camera.isEnableTrans())
         {
-            m_lastMousePos = event->pos();
+            m_posLast = event->pos();
             m_bDragging = true;
             setCursor(Qt::ClosedHandCursor);
         }
@@ -203,9 +205,9 @@ namespace GLRhi
 
         if (m_bDragging && m_camera.isEnableTrans())
         {
-            QPointF delta = event->pos() - m_lastMousePos;
+            QPointF delta = event->pos() - m_posLast;
             m_camera.translate(delta, size());
-            m_lastMousePos = event->pos();
+            m_posLast = event->pos();
             update();
         }
         QOpenGLWidget::mouseMoveEvent(event);
@@ -219,8 +221,8 @@ namespace GLRhi
             return;
         }
 
-        float scaleFactor = event->angleDelta().y() > 0 ? 1.1f : 0.9f;
-        m_camera.scale(event->position(), scaleFactor, size());
+        float dScaleFactor = event->angleDelta().y() > 0 ? 1.1f : 0.9f;
+        m_camera.scale(event->position(), dScaleFactor, size());
         update();
         QOpenGLWidget::wheelEvent(event);
     }
@@ -231,13 +233,13 @@ namespace GLRhi
         update();
     }
 
-    void RenderWidget::setAntiAliasEnabled(bool enabled)
+    void RenderWidget::setAntiAliasEnabled(bool bEnabled)
     {
-        if (m_bAntiAliasEnabled != enabled)
+        if (m_bAntiAlias != bEnabled)
         {
-            m_bAntiAliasEnabled = enabled;
+            m_bAntiAlias = bEnabled;
             makeCurrent();
-            if (m_bAntiAliasEnabled)
+            if (m_bAntiAlias)
                 glEnable(GL_MULTISAMPLE);
             else
                 glDisable(GL_MULTISAMPLE);
@@ -248,7 +250,7 @@ namespace GLRhi
 
     bool RenderWidget::isAntiAliasEnabled() const
     {
-        return m_bAntiAliasEnabled;
+        return m_bAntiAlias;
     }
 
     void RenderWidget::updateLineDataBuffer(float* data, size_t count, Brush color)

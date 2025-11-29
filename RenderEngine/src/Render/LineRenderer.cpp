@@ -144,7 +144,7 @@ namespace GLRhi
 
         for (const auto& polylineData : vPolylineDatas)
         {
-            const auto& allVerts = polylineData.verts;
+            const auto& allVerts = polylineData.vVerts;
             if (allVerts.empty() || allVerts.size() % 3 != 0)
             {
                 qWarning() << "Skipping invalid polyline: vertex count not divisible by 3";
@@ -158,7 +158,7 @@ namespace GLRhi
             vAllVertices.insert(vAllVertices.end(), allVerts.begin(), allVerts.end());
 
             size_t startIndex = nVertexOffset;
-            const auto& lineVertexSz = polylineData.count;
+            const auto& lineVertexSz = polylineData.vCount;
             for (size_t count : lineVertexSz)
             {
                 for (size_t j = 0; j < count; ++j)

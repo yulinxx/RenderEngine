@@ -17,7 +17,7 @@ namespace GLRhi
         // lineCount:生成指定数量的线段
         // minPoints: 每条线段的最小点数
         // maxPoints: 每条线段的最大点数
-        void generateLines(int lineCount = 1, int minPoints = 2, int maxPoints = 5000);
+        void generateLines(size_t lineCount = 1, size_t minPoints = 2, size_t maxPoints = 5000);
 
         // 获取生成的顶点数据
         const std::vector<float>& getVertices() const;
@@ -28,7 +28,6 @@ namespace GLRhi
         // 清空数据
         void clear() override;
 
-    private:
         // 生成单个线段的随机点
         void generateSingleLine(int pointCount);
 

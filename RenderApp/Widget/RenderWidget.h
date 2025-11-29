@@ -5,6 +5,7 @@
 #include <QOpenGLFunctions_3_3_Core>
 
 #include "Common/Camera.h"
+#include "Common/Brush.h"
 #include "Render/RenderManager.h"
 #include "Render/RenderCommon.h"
 
@@ -78,9 +79,9 @@ namespace GLRhi
         Camera m_camera;                    // 相机控制器
         RenderManager m_renderManager;      // 渲染管理器
         GetMousePtCb m_mouseCb = nullptr;   // 鼠标位置回调
-        QPointF m_lastMousePos;             // 鼠标按下位置
+        QPointF m_posLast;                  // 鼠标按下位置
         bool m_bDragging = false;           // 拖动状态标记
-        bool m_bAntiAliasEnabled = true;    // 抗锯齿启用状态
+        bool m_bAntiAlias = true;           // 抗锯齿启用状态
         bool m_bWireframeMode = false;      // 线框模式状态
     };
 }

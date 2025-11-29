@@ -99,15 +99,15 @@ namespace GLRhi
         {
             Batch batch;
             batch.indexOffset = static_cast<unsigned int>(totalIndices);
-            batch.indexCount = static_cast<unsigned int>(texData.indices.size());
+            batch.indexCount = static_cast<unsigned int>(texData.vIndices.size());
             batch.tex = texData.tex;
             batch.brush = texData.brush;
             m_vBatches.push_back(batch);
 
             m_vTextureIds.push_back(texData.tex);
 
-            totalVertices += texData.verts.size() / 4;
-            totalIndices += texData.indices.size();
+            totalVertices += texData.vVerts.size() / 4;
+            totalIndices += texData.vIndices.size();
         }
 
         std::vector<float> allVertices;
@@ -115,7 +115,7 @@ namespace GLRhi
         for (const auto& texData : vTexDatas)
         {
             allVertices.insert(allVertices.end(),
-                texData.verts.begin(), texData.verts.end());
+                texData.vVerts.begin(), texData.vVerts.end());
         }
 
         std::vector<unsigned int> allIndices;
@@ -124,11 +124,11 @@ namespace GLRhi
         unsigned int vertexOffset = 0;
         for (const auto& texData : vTexDatas)
         {
-            for (unsigned int idx : texData.indices)
+            for (unsigned int idx : texData.vIndices)
             {
                 allIndices.push_back(idx + vertexOffset);
             }
-            vertexOffset += static_cast<unsigned int>(texData.verts.size() / 4);
+            vertexOffset += static_cast<unsigned int>(texData.vVerts.size() / 4);
         }
 
         m_gl->glBindVertexArray(m_nVao);
