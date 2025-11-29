@@ -86,34 +86,34 @@ namespace GLRhi
         void setAlpha(float alpha);
 
         uint32_t toUInt32() const;
-        
-        // 常用颜色静态常量
-        static const Color BLACK;
-        static const Color WHITE;
-        static const Color RED;
-        static const Color GREEN;
-        static const Color BLUE;
-        static const Color YELLOW;
-        static const Color CYAN;
-        static const Color MAGENTA;
-        static const Color GREY;
-        static const Color LIGHT_GREY;
-        static const Color DARK_GREY;
-        static const Color ORANGE;
-        static const Color PURPLE;
-        static const Color BROWN;
-        static const Color PINK;
-        static const Color LIME;
-        static const Color TEAL;
-        static const Color NAVY;
-        static const Color MAROON;
-        static const Color OLIVE;
-        static const Color SILVER;
-        static const Color TRANSPARENT;
-        
 private:
         float m_arrColor[COLOR_COUNT] = { 1.0f, 1.0f, 1.0f, 1.0f }; // RGBA颜色数组
     };
+
+
+    // 常用颜色定义
+    static inline const Color BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };       // 黑色
+    static inline const Color WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };       // 白色
+    static inline const Color RED{ 1.0f, 0.0f, 0.0f, 1.0f };         // 红色
+    static inline const Color GREEN{ 0.0f, 1.0f, 0.0f, 1.0f };       // 绿色
+    static inline const Color BLUE{ 0.0f, 0.0f, 1.0f, 1.0f };        // 蓝色
+    static inline const Color YELLOW{ 1.0f, 1.0f, 0.0f, 1.0f };      // 黄色
+    static inline const Color CYAN{ 0.0f, 1.0f, 1.0f, 1.0f };        // 青色
+    static inline const Color MAGENTA{ 1.0f, 0.0f, 1.0f, 1.0f };     // 品红色
+    static inline const Color GREY{ 0.5f, 0.5f, 0.5f, 1.0f };        // 灰色
+    static inline const Color LIGHT_GREY{ 0.75f, 0.75f, 0.75f, 1.0f }; // 浅灰色
+    static inline const Color DARK_GREY{ 0.25f, 0.25f, 0.25f, 1.0f };  // 深灰色
+    static inline const Color ORANGE{ 1.0f, 0.65f, 0.0f, 1.0f };     // 橙色
+    static inline const Color PURPLE{ 0.5f, 0.0f, 0.5f, 1.0f };      // 紫色
+    static inline const Color BROWN{ 0.65f, 0.16f, 0.16f, 1.0f };    // 棕色
+    static inline const Color PINK{ 1.0f, 0.75f, 0.8f, 1.0f };       // 粉色
+    static inline const Color LIME{ 0.75f, 1.0f, 0.0f, 1.0f };       // 酸橙色
+    static inline const Color TEAL{ 0.0f, 0.5f, 0.5f, 1.0f };        // 青色/蓝绿色
+    static inline const Color NAVY{ 0.0f, 0.0f, 0.5f, 1.0f };        // 藏青色
+    static inline const Color MAROON{ 0.5f, 0.0f, 0.0f, 1.0f };      // 栗色
+    static inline const Color OLIVE{ 0.5f, 0.5f, 0.0f, 1.0f };       // 橄榄绿
+    static inline const Color SILVER{ 0.75f, 0.75f, 0.75f, 1.0f };   // 银色
+    //static inline const Color TRANSPARENT{ 0.0f, 0.0f, 0.0f, 0.0f }; // 透明色
 }
 
 #endif // COLOR_H
