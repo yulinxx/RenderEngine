@@ -71,7 +71,7 @@ namespace GLRhi
         s_colorPool.emplace_back(1.0f, 1.0f, 0.0f, 1.0f);     // 黄色
         s_colorPool.emplace_back(1.0f, 0.0f, 1.0f, 1.0f);     // 洋红色
         s_colorPool.emplace_back(0.0f, 1.0f, 1.0f, 1.0f);     // 青色
-        //s_colorPool.emplace_back(1.0f, 1.0f, 1.0f, 1.0f);    // 白色
+        s_colorPool.emplace_back(1.0f, 1.0f, 1.0f, 1.0f);    // 白色
         
         // 灰色系列
         s_colorPool.emplace_back(0.0f, 0.0f, 0.0f, 1.0f);     // 黑色

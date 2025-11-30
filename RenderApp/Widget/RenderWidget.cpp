@@ -43,14 +43,11 @@ namespace GLRhi
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
-        glEnable(GL_PRIMITIVE_RESTART);
-        glPrimitiveRestartIndex(0xFFFFFFFF);
+        //glEnable(GL_PRIMITIVE_RESTART);
+        //glPrimitiveRestartIndex(0xFFFFFFFF);
 
         // 初始化抗锯齿状态
-        if (m_bAntiAlias)
-            glEnable(GL_MULTISAMPLE);
-        else
-            glDisable(GL_MULTISAMPLE);
+        m_bAntiAlias ? glEnable(GL_MULTISAMPLE) : glDisable(GL_MULTISAMPLE);
 
         glPolygonMode(GL_FRONT_AND_BACK, m_bWireframeMode ? GL_LINE : GL_FILL);
 
@@ -91,6 +88,7 @@ namespace GLRhi
         {
             // F1：启用/关闭抗锯齿
             setAntiAliasEnabled(!m_bAntiAlias);
+            qDebug() << "AntiAliasEnabled:" << m_bAntiAlias;
         }
         break;
         case Qt::Key_F2:
@@ -98,17 +96,19 @@ namespace GLRhi
             // F2：启用/关闭线框模式
             makeCurrent();
             m_bWireframeMode = !m_bWireframeMode;
-            (m_bWireframeMode) ?
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+            glPolygonMode(GL_FRONT_AND_BACK, m_bWireframeMode ? GL_LINE : GL_FILL);
+
             update();
+            qDebug() << "WireframeMode:" << m_bWireframeMode;
         }
         break;
         case Qt::Key_F3:
         {
             // F3：使用随机数生成棋盘格颜色和大小
             // 生成随机大小（范围：8-32）
-            int randomSize = 8 + std::rand() % 25; // 8到32之间的随机数
-            setCheckerboardSz(randomSize);
+            int nRandomSz = 8 + std::rand() % 25; // 8到32之间的随机数
+            setCheckerboardSz(nRandomSz);
 
             // 生成两个随机颜色
             float r1 = static_cast<float>(std::rand()) / RAND_MAX;
@@ -146,17 +146,75 @@ namespace GLRhi
             Brush brushA(r1, g1, b1, a1);
             Brush brushB(r2, g2, b2, a2);
             setShowCheckerboardColor(brushA, brushB);
+            qDebug() << "CheckerboardSz:" << nRandomSz;
         }
         break;
         case Qt::Key_F4:
             // F4：随机动态数据
             m_renderManager.dataCRUD();
+            qDebug() << "RandomDynamicData";
             break;
         case Qt::Key_F5:
+        {
             makeCurrent();
-            m_renderManager.genFakeData();
+            // 检查修饰键组合
+            bool hasCtrl = event->modifiers() & Qt::ControlModifier;
+            bool hasAlt = event->modifiers() & Qt::AltModifier;
+            bool hasShift = event->modifiers() & Qt::ShiftModifier;
+
+            // 根据不同的修饰键组合执行不同的操作
+            if (hasCtrl && hasAlt && hasShift)
+            {
+                // Ctrl+Alt+Shift+F5: 生成更多的伪数据
+                //m_renderManager.genFakeData(2000); // 假设genFakeData可以接受参数表示数据量
+                qDebug() << "GenFakeData (Ctrl+Alt+Shift+F5) - More data";
+            }
+            else if (hasCtrl && hasAlt)
+            {
+                // Ctrl+Alt+F5: 生成中等数量的伪数据
+                //m_renderManager.genFakeData(1000);
+                qDebug() << "GenFakeData (Ctrl+Alt+F5) - Medium data";
+            }
+            else if (hasCtrl && hasShift)
+            {
+                // Ctrl+Shift+F5: 生成特殊类型的伪数据
+                //m_renderManager.genSpecialFakeData(); // 假设存在此方法
+                qDebug() << "GenSpecialFakeData (Ctrl+Shift+F5)";
+            }
+            else if (hasAlt && hasShift)
+            {
+                // Alt+Shift+F5: 清空现有数据并生成新数据
+                //m_renderManager.clearAllData(); // 假设存在此方法
+                //m_renderManager.genFakeData();
+                qDebug() << "Clear and GenFakeData (Alt+Shift+F5)";
+            }
+            else if (hasCtrl)
+            {
+                // Ctrl+F5: 生成少量伪数据
+                //m_renderManager.genFakeData(500);
+                qDebug() << "GenFakeData (Ctrl+F5) - Less data";
+            }
+            else if (hasAlt)
+            {
+                // Alt+F5: 生成不同类型的伪数据
+                //m_renderManager.genAlternativeFakeData(); // 假设存在此方法
+                qDebug() << "GenAlternativeFakeData (Alt+F5)";
+            }
+            else if (hasShift)
+            {
+                // Shift+F5: 重新生成相同数量的伪数据
+                //m_renderManager.regenerateFakeData(); // 假设存在此方法
+                qDebug() << "RegenerateFakeData (Shift+F5)";
+            }
+            else
+            {
+                // 单独按F5: 默认行为
+                m_renderManager.genFakeData();
+                qDebug() << "GenFakeData (F5)";
+            }
             update();
-            break;
+        }
+        break;
         default:
             break;
         }
@@ -238,12 +296,11 @@ namespace GLRhi
         if (m_bAntiAlias != bEnabled)
         {
             m_bAntiAlias = bEnabled;
+
             makeCurrent();
-            if (m_bAntiAlias)
-                glEnable(GL_MULTISAMPLE);
-            else
-                glDisable(GL_MULTISAMPLE);
+            m_bAntiAlias ? glEnable(GL_MULTISAMPLE) : glDisable(GL_MULTISAMPLE);
             doneCurrent();
+
             update();
         }
     }
@@ -296,22 +353,28 @@ namespace GLRhi
     void RenderWidget::setShowCheckerboard(bool b)
     {
         auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
-        board->setVisible(b);
-        update();
+        if (board) { // 添加空指针检查
+            board->setVisible(b);
+            update();
+        }
     }
 
     void RenderWidget::setCheckerboardSz(int n)
     {
         auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
-        board->setSize(static_cast<float>(n));
-        update();
+        if (board) { // 添加空指针检查
+            board->setSize(static_cast<float>(n));
+            update();
+        }
     }
 
     void RenderWidget::setShowCheckerboardColor(Brush brushA, Brush brushB)
     {
         auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
-        board->setColors(brushA.getColor(), brushB.getColor());
-        update();
+        if (board) { // 添加空指针检查
+            board->setColors(brushA.getColor(), brushB.getColor());
+            update();
+        }
     }
 
     void RenderWidget::zoomToRange(float minX, float minY, float maxX, float maxY)

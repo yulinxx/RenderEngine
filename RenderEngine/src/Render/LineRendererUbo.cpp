@@ -59,7 +59,8 @@ namespace GLRhi
 
     void LineRendererUbo::cleanup()
     {
-        if (!m_gl) return;
+        if (!m_gl)
+            return;
 
         deleteVbo(m_nVbo);
         deleteEbo(m_nEbo);
@@ -85,10 +86,13 @@ namespace GLRhi
         m_program->bind();
         m_gl->glBindVertexArray(m_nVao);
 
-        GLuint nBlockIndex = m_gl->glGetUniformBlockIndex(m_program->programId(), "LineDataUBO");
-        if (nBlockIndex != GL_INVALID_INDEX)
+        GLuint m_uUboLoc = m_gl->glGetUniformBlockIndex(m_program->programId(), "uLineDataUBO");
+        if (m_uUboLoc != GL_INVALID_INDEX)
         {
-            m_gl->glUniformBlockBinding(m_program->programId(), nBlockIndex, 0);
+
+            // 没有在着色器中指定binding，则手动关联
+            m_gl->glUniformBlockBinding(m_program->programId(), m_uUboLoc, 0);
+
             m_gl->glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_nUbo);
         }
 
@@ -163,7 +167,8 @@ namespace GLRhi
         for (size_t groupID = 0; groupID < polylines.size(); ++groupID)
         {
             const auto& group = polylines[groupID];
-            if (group.vCount.empty()) continue;
+            if (group.vCount.empty()) 
+                continue;
 
             uboColors[groupID * 4 + 0] = group.brush.r();
             uboColors[groupID * 4 + 1] = group.brush.g();
@@ -208,6 +213,7 @@ namespace GLRhi
 
         m_totalIndexCount = static_cast<GLsizei>(indexData.size());
 
+        // 更新UBO数据 更新一次后，所有绑定到该UBO的着色器都会自动使用新数据
         m_gl->glBindBuffer(GL_UNIFORM_BUFFER, m_nUbo);
         m_gl->glBufferData(GL_UNIFORM_BUFFER, 2048 * 4 * sizeof(float) + 2048 * sizeof(float), nullptr, GL_STATIC_DRAW);
         m_gl->glBufferSubData(GL_UNIFORM_BUFFER, 0, uboColors.size() * sizeof(float), uboColors.data());

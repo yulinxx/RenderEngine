@@ -4,6 +4,7 @@
 #include "IRenderer.h"
 #include "RenderCommon.h"
 #include <vector>
+#include "DataManager/PolylinesVboManager.h"
 
 namespace GLRhi
 {
@@ -34,6 +35,8 @@ namespace GLRhi
         int m_uCameraMatLoc = -1;
         int m_uColorLoc = -1;
         int m_uDepthLoc = -1;
+
+        PolylinesVboManager m_vboManager;
     };
 }
 #endif // LINE_RENDERER_H

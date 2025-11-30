@@ -7,7 +7,11 @@ layout(location = 1) in float aLineID;
 
 uniform mat4 uCameraMat;
 
-layout(std140) uniform LineDataUBO {
+//std140：内存布局规则，确保跨着色器的数据对齐一致性
+//std140 是OpenGL中Uniform Block（统一块）的内存布局规则，
+//用于明确指定着色器中Uniform变量在GPU内存中的排列方式，
+// 确保CPU端与GPU端数据对齐一致
+layout(std140) uniform uLineDataUBO {
     vec4 colors[2048];
     float depths[2048];
 };

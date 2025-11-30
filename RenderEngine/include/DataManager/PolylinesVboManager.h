@@ -94,7 +94,7 @@ namespace GLRhi
          * @param vPolylineDatas 折线数据向量
          * @return true全部或部分添加成功，false全部失败
          */
-        bool addPolylines(std::vector<PolylineData>& vPolylineDatas);
+        bool addPolylines(const std::vector<PolylineData>& vPolylineDatas);
 
         /**
          * @brief 删除指定ID的折线

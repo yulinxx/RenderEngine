@@ -160,7 +160,7 @@ namespace GLRhi
      *
      * @note 内部会跳过顶点数少于2的无效折线
      */
-    bool PolylinesVboManager::addPolylines(std::vector<PolylineData>& vPlDatas)
+    bool PolylinesVboManager::addPolylines(const std::vector<PolylineData>& vPlDatas)
     {
         bool bAllSuccess = true;
         for (auto& data : vPlDatas)

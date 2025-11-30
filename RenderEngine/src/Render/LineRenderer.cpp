@@ -56,6 +56,10 @@ namespace GLRhi
 
     void LineRenderer::render(const float* cameraMat)
     {
+        //m_vboManager.renderVisiblePrimitivesEx();
+
+        return;
+
         if (m_nVao == 0 || m_nVbo == 0 || m_nEbo == 0 ||
             m_vPlineBrush.empty() || m_vIndexCounts.empty() || m_vIndexOffsets.empty())
         {
@@ -101,7 +105,8 @@ namespace GLRhi
 
     void LineRenderer::cleanup()
     {
-        if (!m_gl) return;
+        if (!m_gl) 
+            return;
 
         unbindABE();
         deleteVaoVbo(m_nVao, m_nVbo);
@@ -122,6 +127,12 @@ namespace GLRhi
 
     void LineRenderer::updateData(const std::vector<PolylineData>& vPolylineDatas)
     {
+
+        //addPolylines(std::vector<PolylineData>& vPlDatas)
+
+        //m_vboManager.addPolylines(vPolylineDatas);
+        return;
+
         if (!m_gl || vPolylineDatas.empty())
         {
             cleanup();
