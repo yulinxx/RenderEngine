@@ -245,7 +245,8 @@ namespace GLRhi
 
             m_vPolylineDatas.insert(m_vPolylineDatas.end(), vPLineDatas.begin(), vPLineDatas.end());
 
-            m_plVboManager.addPolylines(vPLineDatas);
+            // 使用const_cast将非常量引用转换为常量引用，以匹配PolylinesVboManager::addPolylines的实现
+            m_plVboManager.addPolylines(const_cast<const std::vector<PolylineData>&>(vPLineDatas));
 
             // for (auto& pl : vPLineDatas)
             //{
