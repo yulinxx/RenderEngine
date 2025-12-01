@@ -7,7 +7,7 @@
 
 namespace GLRhi
 {
-    class GLRENDER_EXPORT CheckerboardRenderer final : public IRenderer
+    class GLRENDER_API CheckerboardRenderer final : public IRenderer
     {
     public:
         CheckerboardRenderer();

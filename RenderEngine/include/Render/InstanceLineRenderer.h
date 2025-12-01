@@ -8,7 +8,7 @@
 
 namespace GLRhi
 {
-    class GLRENDER_EXPORT InstanceLineRenderer : public IRenderer
+    class GLRENDER_API InstanceLineRenderer : public IRenderer
     {
     public:
         InstanceLineRenderer() = default;

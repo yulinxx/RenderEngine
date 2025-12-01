@@ -16,7 +16,7 @@ namespace GLRhi
         } \
     }
 
-    class GLRENDER_EXPORT IRenderer
+    class GLRENDER_API IRenderer
     {
     public:
         virtual ~IRenderer() = default;

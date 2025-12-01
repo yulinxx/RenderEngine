@@ -8,7 +8,7 @@
 
 namespace GLRhi
 {
-    class GLRENDER_EXPORT InstanceTriangleRenderer : public IRenderer
+    class GLRENDER_API InstanceTriangleRenderer : public IRenderer
     {
     public:
         InstanceTriangleRenderer() = default;

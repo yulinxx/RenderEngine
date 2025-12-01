@@ -56,7 +56,7 @@ namespace GLRhi
 
     void LineRenderer::render(const float* cameraMat)
     {
-        //m_vboManager.renderVisiblePrimitivesEx();
+        m_vboManager.renderVisiblePrimitivesEx();
 
         return;
 
@@ -130,7 +130,7 @@ namespace GLRhi
 
         //addPolylines(std::vector<PolylineData>& vPlDatas)
 
-        //m_vboManager.addPolylines(vPolylineDatas);
+        m_vboManager.addPolylines(vPolylineDatas);
         return;
 
         if (!m_gl || vPolylineDatas.empty())

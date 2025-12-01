@@ -218,13 +218,14 @@ namespace GLRhi
         {
             std::vector<PolylineData> vPLineDatas = m_dataGen->genLineData(60);
 
-            static_cast<LineRendererUbo*>(m_lineUBORenderer.get())->updateData(vPLineDatas);
+            //static_cast<LineRendererUbo*>(m_lineUBORenderer.get())->updateData(vPLineDatas);
+            static_cast<LineRenderer*>(m_lineRenderer.get())->updateData(vPLineDatas);
 
             m_dataManager.setPolylineDatas(vPLineDatas);
         }
 
         // 三角形数据
-        if (1)
+        if (0)
         {
             std::vector<TriangleData> vTriDatas = m_dataGen->genTriangleData();
             static_cast<TriangleRenderer*>(m_triRenderer.get())->updateData(vTriDatas);
@@ -233,7 +234,7 @@ namespace GLRhi
         }
 
         // 纹理数据
-        if (1)
+        if (0)
         {
             std::vector<TextureData> vTexDatas = m_dataGen->genTextureData();
             static_cast<TextureRenderer*>(m_texRenderer.get())->updateData(vTexDatas);
@@ -241,7 +242,7 @@ namespace GLRhi
         }
 
         // 实例化纹理数据
-        if (1)
+        if (0)
         {
             GLuint textureArrayId = 0;
             int textureCount = 0;
@@ -260,7 +261,7 @@ namespace GLRhi
         }
 
         // 实例化线段数据
-        if (1)
+        if (0)
         {
             m_instanceLineFakeData->genLines(1000, 0.001f, 0.003f);
             std::vector<InstanceLineData>& lineData = m_instanceLineFakeData->getInstanceData();
@@ -270,7 +271,7 @@ namespace GLRhi
         }
 
         // 实例化三角形数据
-        if (1)
+        if (0)
         {
             m_instanceTriangleFakeData->genTriangles(1000, 0.02f, 0.050f);
             const auto& triangleData = m_instanceTriangleFakeData->getInstanceData();

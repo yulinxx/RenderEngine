@@ -26,7 +26,7 @@
 
 namespace GLRhi
 {
-    class GLRENDER_EXPORT RenderManager final
+    class GLRENDER_API RenderManager final
     {
     public:
         RenderManager();

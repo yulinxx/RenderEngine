@@ -10,7 +10,7 @@
 namespace GLRhi
 {
     // 截图数据结构体
-    struct GLRENDER_EXPORT RenderSnap
+    struct GLRENDER_API RenderSnap
     {
         QImage image;
         QRectF worldRect;
@@ -18,7 +18,7 @@ namespace GLRhi
 
     // 多段线
     // 使用内存对齐优化的线段数据结构
-    struct GLRENDER_EXPORT PolylineData
+    struct GLRENDER_API PolylineData
     {
         //long long id;                         // ID
         std::vector<long long> vId;             // ID
@@ -49,7 +49,7 @@ namespace GLRhi
     };
 
     // 三角形
-    struct GLRENDER_EXPORT TriangleData
+    struct GLRENDER_API TriangleData
     {
         long long id;                       // ID
         std::vector<float> vVerts;           // x, y, len
@@ -68,7 +68,7 @@ namespace GLRhi
     };
 
     // 纹理
-    struct GLRENDER_EXPORT TextureData
+    struct GLRENDER_API TextureData
     {
         long long id;                       // ID
         std::vector<float> vVerts;           //  x, y, u, v
@@ -78,7 +78,7 @@ namespace GLRhi
     };
 
     // 实例纹理
-    struct GLRENDER_EXPORT InstanceTexData
+    struct GLRENDER_API InstanceTexData
     {
         long long id;                       // ID
         float x, y;          // 位置

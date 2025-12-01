@@ -11,7 +11,7 @@ namespace GLRhi
      *
      * 封装了RGBA颜色的存储和操作，提供颜色创建、修改、混合等功能。
      */
-    class GLRENDER_EXPORT Color
+    class GLRENDER_API Color
     {
     public:
         enum ColorIndex

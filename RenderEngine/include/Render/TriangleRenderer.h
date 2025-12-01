@@ -8,7 +8,7 @@
 
 namespace GLRhi
 {
-    class GLRENDER_EXPORT TriangleRenderer : public IRenderer
+    class GLRENDER_API TriangleRenderer : public IRenderer
     {
     public:
         TriangleRenderer() = default;

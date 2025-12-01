@@ -7,7 +7,7 @@
 
 namespace GLRhi
 {
-    class GLRENDER_EXPORT Camera
+    class GLRENDER_API Camera
     {
     public:
         Camera() = default;

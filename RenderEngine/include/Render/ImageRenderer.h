@@ -15,7 +15,7 @@ namespace GLRhi
         float depth = 0.0f;             // 深度值
     };
 
-    class GLRENDER_EXPORT ImageRenderer : public IRenderer
+    class GLRENDER_API ImageRenderer : public IRenderer
     {
     public:
         ImageRenderer() = default;

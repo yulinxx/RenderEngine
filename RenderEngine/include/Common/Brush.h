@@ -6,7 +6,7 @@
 
 namespace GLRhi
 {
-    class GLRENDER_EXPORT Brush
+    class GLRENDER_API Brush
     {
     public:
         Brush(float red = 1.0f, float green = 1.0f, float blue = 1.0f,
