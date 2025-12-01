@@ -1,6 +1,7 @@
 #ifndef POLYLINES_VBO_MANAGER_H
 #define POLYLINES_VBO_MANAGER_H
 
+#include "GLRenderExport.h"
 #include <vector>
 #include <unordered_map>
 #include <shared_mutex>
@@ -70,7 +71,7 @@ namespace GLRhi
      * - 增量数据上传策略，减少GPU通信开销
      * - 使用VAO/VBO/EBO进行高效渲染，支持OpenGL 3.3+
      */
-    class PolylinesVboManager final
+    class GLRENDER_API PolylinesVboManager final
     {
     public:
         PolylinesVboManager();

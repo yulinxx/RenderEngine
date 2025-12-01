@@ -1,6 +1,7 @@
 #ifndef COLOR_TRIANGLE_RENDERER_H
 #define COLOR_TRIANGLE_RENDERER_H
 
+#include "GLRenderExport.h"
 #include "IRenderer.h"
 #include "RenderCommon.h"
 
@@ -19,7 +20,7 @@ namespace GLRhi
     //    Brush brush{ 0.0, 0.0, 0.0, 1.0, 0.0 };
     //};
 
-    class ColorTriangleRenderer : public IRenderer
+    class GLRENDER_API ColorTriangleRenderer : public IRenderer
     {
     public:
         ColorTriangleRenderer() = default;

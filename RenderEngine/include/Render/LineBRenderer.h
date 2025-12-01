@@ -1,6 +1,7 @@
 #ifndef LINEBRENDER_H
 #define LINEBRENDER_H
 
+#include "GLRenderExport.h"
 #include "IRenderer.h"
 #include "RenderCommon.h"
 
@@ -20,7 +21,7 @@ namespace GLRhi
         float thickness = 0.003f; // 线宽
     };
 
-    class LineBRenderer : public IRenderer
+    class GLRENDER_API LineBRenderer : public IRenderer
     {
     public:
         LineBRenderer() = default;

@@ -1,6 +1,7 @@
 #ifndef LINE_RENDERER_UBO_H
 #define LINE_RENDERER_UBO_H
 
+#include "GLRenderExport.h"
 #include "IRenderer.h"
 #include "RenderCommon.h"
 #include "Render/LineRenderer.h"
@@ -9,7 +10,7 @@
 
 namespace GLRhi
 {
-    class LineRendererUbo : public IRenderer
+    class GLRENDER_API LineRendererUbo : public IRenderer
     {
     public:
         LineRendererUbo() = default;

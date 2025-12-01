@@ -1,6 +1,7 @@
 #ifndef INSTANCE_TEXTURE_RENDERER_H
 #define INSTANCE_TEXTURE_RENDERER_H
 
+#include "GLRenderExport.h"
 #include "Render/IRenderer.h"
 #include "Render/RenderCommon.h"
 #include <vector>
@@ -9,7 +10,7 @@
 
 namespace GLRhi
 {
-    class InstanceTextureRenderer final : public IRenderer
+    class GLRENDER_API InstanceTextureRenderer final : public IRenderer
     {
     public:
         InstanceTextureRenderer() = default;

@@ -1,7 +1,8 @@
 #ifndef COLORLINEBRENDER_H
 #define COLORLINEBRENDER_H
 
-#include "IRenderer.h"
+#include "GLRenderExport.h"
+#include "Render/IRenderer.h"
 #include "RenderCommon.h"
 
 #include <vector>
@@ -20,7 +21,7 @@ namespace GLRhi
         float thickness = 0.003f; // 线宽
     };
 
-    class ColorLineBRenderer : public IRenderer
+    class GLRENDER_API ColorLineBRenderer : public IRenderer
     {
     public:
         ColorLineBRenderer() = default;

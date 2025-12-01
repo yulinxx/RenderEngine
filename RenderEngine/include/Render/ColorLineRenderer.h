@@ -1,6 +1,7 @@
 #ifndef COLORLINE_RENDERER_H
 #define COLORLINE_RENDERER_H
 
+#include "GLRenderExport.h"
 #include "IRenderer.h"
 #include "RenderCommon.h"
 #include "Render/LineRenderer.h"
@@ -14,7 +15,7 @@ namespace GLRhi
     //    Brush brush{ 0.0, 0.0, 0.0, 1.0, 0.0 };
     //};
 
-    class ColorLineRenderer : public IRenderer
+    class GLRENDER_API ColorLineRenderer : public IRenderer
     {
     public:
         ColorLineRenderer() = default;

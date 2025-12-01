@@ -1,6 +1,8 @@
 #ifndef FAKE_DATA_PROVIDER_H
 #define FAKE_DATA_PROVIDER_H
 
+#include "GLRenderExport.h"
+
 #include <vector>
 #include <QOpenGLFunctions_3_3_Core>
 
@@ -15,7 +17,7 @@ namespace GLRhi
      * @brief 假数据提供者类
      * 用于生成各种测试和演示用的渲染数据
      */
-    class FakeDataProvider
+    class GLRENDER_API FakeDataProvider
     {
     public:
         FakeDataProvider();

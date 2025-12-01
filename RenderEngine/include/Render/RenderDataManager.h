@@ -2,12 +2,13 @@
 #define RENDER_DATA_MANAGER_H
 
 #include "Render/RenderCommon.h"
+#include "GLRenderExport.h"
 
 namespace GLRhi
 {
     class Impl;
 
-    class RenderDataManager final
+    class GLRENDER_API RenderDataManager final
     {
     public:
         RenderDataManager();

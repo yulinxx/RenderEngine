@@ -1,6 +1,7 @@
 #ifndef TEXTURE_LOADER_H
 #define TEXTURE_LOADER_H
 
+#include "GLRenderExport.h"
 #include <QOpenGLFunctions_3_3_Core>
 #include <QImage>
 #include <QString>
@@ -8,7 +9,7 @@
 
 namespace GLRhi
 {
-    class TextureLoader
+    class GLRENDER_API TextureLoader
     {
     public:
         // 从文件加载纹理，返回 OpenGL 纹理 ID（0表示失败）

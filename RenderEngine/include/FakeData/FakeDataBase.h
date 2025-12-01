@@ -4,10 +4,11 @@
 #include <random>
 #include <vector>
 #include "Common/Color.h"
+#include "GLRenderExport.h"
 
 namespace GLRhi
 {
-    class FakeDataBase
+    class GLRENDER_API FakeDataBase
     {
     public:
         FakeDataBase();
