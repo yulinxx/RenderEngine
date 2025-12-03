@@ -33,7 +33,7 @@ namespace GLRhi
 
         m_uColorLoc = m_program->uniformLocation("uColor");
         m_uDepthLoc = m_program->uniformLocation("uDepth");
-        m_nCameraMatLoc = m_program->uniformLocation("uCameraMat");
+        m_uCameraMatLoc = m_program->uniformLocation("uCameraMat");
 
         bool bUniformError = (m_uColorLoc < 0) || (m_uDepthLoc < 0);
         if (bUniformError)
@@ -56,7 +56,13 @@ namespace GLRhi
 
     void LineRenderer::render(const float* cameraMat)
     {
+        m_program->bind();
+
+        if (m_uCameraMatLoc >= 0)
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
+
         m_vboManager.renderVisiblePrimitivesEx();
+        m_program->release();
 
         return;
 
@@ -127,9 +133,7 @@ namespace GLRhi
 
     void LineRenderer::updateData(const std::vector<PolylineData>& vPolylineDatas)
     {
-
         //addPolylines(std::vector<PolylineData>& vPlDatas)
-
         m_vboManager.addPolylines(vPolylineDatas);
         return;
 

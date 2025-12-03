@@ -198,5 +198,4 @@ namespace GLRhi
            toByte(m_arrColor[RED]);
     }
     
-    
 } // namespace GLRhi

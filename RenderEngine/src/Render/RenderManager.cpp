@@ -218,9 +218,10 @@ namespace GLRhi
         {
             std::vector<PolylineData> vPLineDatas = m_dataGen->genLineData(60);
 
-            //static_cast<LineRendererUbo*>(m_lineUBORenderer.get())->updateData(vPLineDatas);
-            static_cast<LineRenderer*>(m_lineRenderer.get())->updateData(vPLineDatas);
+            // static_cast<LineRendererUbo*>(m_lineUBORenderer.get())->updateData(vPLineDatas);
+            // m_dataManager.setPolylineDatas(vPLineDatas);
 
+            static_cast<LineRenderer*>(m_lineRenderer.get())->updateData(vPLineDatas);
             m_dataManager.setPolylineDatas(vPLineDatas);
         }
 

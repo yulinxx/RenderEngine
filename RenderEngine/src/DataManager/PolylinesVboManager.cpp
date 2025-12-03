@@ -108,20 +108,20 @@ namespace GLRhi
      * @note 顶点数量必须至少为2个（即vVertices.size() >= 6且为3的倍数）
      */
     bool PolylinesVboManager::addPolyline(long long id,
-        const std::vector<float>& vVerts, const Color& color)
+        float* vertices, size_t vertexCount, const Color& color)
     {
-        if (vVerts.size() < 6 || vVerts.size() % 3 != 0)
+        if (vertexCount < 6)
             return false;
 
         std::unique_lock<std::shared_mutex> lock(m_mutex);
         if (m_IDLocationMap.count(id))
             return false;
 
-        size_t nVertCount = vVerts.size() / 3;
         ColorVBOBlock* block = getColorBlock(color);
         if (!block)
             return false;
 
+        size_t nVertCount = vertexCount / 3;
         checkBlockCapacity(block,
             block->nVertexCount + nVertCount,
             block->nIndexCount + nVertCount);
@@ -142,7 +142,8 @@ namespace GLRhi
         block->nIndexCount += nVertCount;
         block->bDirty = true;
 
-        m_vVertexCache[id] = vVerts;
+        // 将顶点数据复制到缓存中
+        m_vVertexCache[id].assign(vertices, vertices + vertexCount);
         m_IDLocationMap[id] = { color.toUInt32(), color, block, nPrimIdx };
 
         uploadSinglePrimitive(block, nPrimIdx); // 增量上传，只传这一条
@@ -181,7 +182,7 @@ namespace GLRhi
                 vVerts.insert(vVerts.end(), src, src + nCount * 3);
 
                 Color c(data.brush.getColor());
-                if (!addPolyline(data.vId[i], vVerts, c))
+                if (!addPolyline(data.vId[i], vVerts.data(), vVerts.size(), c))
                 {
                     touchCache(data.vId[i]);
                     bAllSuccess = false;
@@ -193,7 +194,7 @@ namespace GLRhi
         return bAllSuccess;
     }
 
-   
+
     /**
      * @brief 批量添加多条折线
      *
@@ -207,7 +208,7 @@ namespace GLRhi
      * @return 添加成功的图元数量（失败的会跳过并打印警告）
      */
     size_t PolylinesVboManager::addPolylines(
-        const std::vector<std::tuple<long long, std::vector<float>, Color>>& vPolylineDatas)
+        const std::vector<std::tuple<long long, float*, size_t, Color>>& vPolylineDatas)
     {
 
         if (vPolylineDatas.empty() || !m_gl)
@@ -230,9 +231,9 @@ namespace GLRhi
             std::shared_lock<std::shared_mutex> readLock(m_mutex);
             for (size_t i = 0; i < vPolylineDatas.size(); ++i) // 遍历组
             {
-                const auto& [id, verts, color] = vPolylineDatas[i]; // tuple 多段线
+                const auto& [id, verts, vertexCount, color] = vPolylineDatas[i]; // tuple 多段线
 
-                if (verts.size() < 6 || verts.size() % 3 != 0)
+                if (vertexCount < 6)
                 {
                     validFlags[i] = false;
                     continue;
@@ -244,7 +245,7 @@ namespace GLRhi
                     continue;
                 }
 
-                size_t nVertCount = verts.size() / 3;
+                size_t nVertCount = vertexCount / 3;
                 uint32_t key = color.toUInt32();
 
                 auto& batchGroup = colorGroups[key];
@@ -297,9 +298,8 @@ namespace GLRhi
                 if (!validFlags[idx])
                     continue;
 
-                const auto& [id, verts, color] = vPolylineDatas[idx];
-                size_t nVertCount = verts.size() / 3;
-
+                const auto& [id, verts, vertexCount, color] = vPolylineDatas[idx];
+                size_t nVertCount = vertexCount / 3;
                 PrimitiveInfo prim;
                 prim.id = id;
                 prim.nIndexCount = static_cast<GLsizei>(nVertCount);
@@ -312,10 +312,10 @@ namespace GLRhi
                 block->idToIndexMap[id] = nPrimIdxInBlock;
 
                 // 缓存顶点（用于后续 update / compact）
-                m_vVertexCache[id] = verts;
+                m_vVertexCache[id].assign(verts, verts + vertexCount);
 
                 // 填充批量缓冲区
-                vBatchVerts.insert(vBatchVerts.end(), verts.begin(), verts.end());
+                vBatchVerts.insert(vBatchVerts.end(), verts, verts + vertexCount);
                 for (size_t i = 0; i < nVertCount; ++i)
                     vBatchIndices.push_back(static_cast<unsigned int>(nVertOffset + i));
 
@@ -438,9 +438,9 @@ namespace GLRhi
      *
      * @note 顶点数量必须至少为2个（即vVertices.size() >= 6且为3的倍数）
      */
-    bool PolylinesVboManager::updatePolyline(long long id, const std::vector<float>& vVerts)
+    bool PolylinesVboManager::updatePolyline(long long id, float* vertices, size_t vertexCount)
     {
-        if (vVerts.size() < 6 || vVerts.size() % 3 != 0)
+        if (vertexCount < 6)
             return false;
 
         std::unique_lock<std::shared_mutex> lock(m_mutex);
@@ -453,23 +453,21 @@ namespace GLRhi
         size_t nPrimIdx = loc.nPrimIdx;
         PrimitiveInfo& prim = block->vPrimitives[nPrimIdx];
 
-        size_t nNewCount = vVerts.size() / 3;
-
         size_t nOldVertCount = static_cast<size_t>(prim.nIndexCount); // 旧顶点数
-        size_t nNewVertCount = vVerts.size() / 3;
-
+        size_t nNewVertCount = vertexCount / 3;
         if (nNewVertCount > nOldVertCount)
         {
             Color c = loc.color;
             lock.unlock();
             removePolyline(id);
-            return addPolyline(id, vVerts, c);
+            return addPolyline(id, vertices, vertexCount, c);
         }
 
-        prim.nIndexCount = static_cast<GLsizei>(nNewCount);
+        prim.nIndexCount = static_cast<GLsizei>(nNewVertCount);
         prim.bValid = true;
 
-        m_vVertexCache[id] = vVerts;
+        // 将顶点数据复制到缓存中
+        m_vVertexCache[id].assign(vertices, vertices + vertexCount);
         block->bDirty = true;
 
         uploadSinglePrimitive(block, nPrimIdx);
