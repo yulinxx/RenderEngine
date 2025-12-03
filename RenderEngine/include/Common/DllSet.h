@@ -1,5 +1,5 @@
-#ifndef GLRENDEREXPORT_H
-#define GLRENDEREXPORT_H
+#ifndef DllSet_H
+#define DllSet_H
 
 #ifdef WIN32
     #ifdef OPENGL_RENDER_DLL_EXPORTS
@@ -12,4 +12,4 @@
     #define GLRENDER_API __attribute__((visibility("default")))
 #endif
 
-#endif // GLRENDEREXPORT_H
+#endif // DllSet_H

@@ -25,12 +25,12 @@ file(GLOB_RECURSE RENDER_SOURCES
 )
 
 file(GLOB_RECURSE RENDER_HEADERS
+"include/*.h"
 "include/Common/*.h"
 "include/DataManager/*.h"
-"include/GLRenderExport.h"
 "include/FakeData/*.h"
-"include/Shader/*.h"
 "include/Render/*.h"
+"include/Shader/*.h"
 )
 
 # 为Visual Studio创建源代码过滤器
