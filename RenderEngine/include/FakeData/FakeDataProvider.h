@@ -1,7 +1,7 @@
 #ifndef FAKE_DATA_PROVIDER_H
 #define FAKE_DATA_PROVIDER_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 
 #include <vector>
 #include <QOpenGLFunctions_3_3_Core>

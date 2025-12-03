@@ -1,7 +1,7 @@
 #ifndef COLOR_TRIANGLE_RENDERER_H
 #define COLOR_TRIANGLE_RENDERER_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 #include "IRenderer.h"
 #include "RenderCommon.h"
 

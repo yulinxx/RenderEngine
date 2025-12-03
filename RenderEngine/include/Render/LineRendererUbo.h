@@ -1,7 +1,7 @@
 #ifndef LINE_RENDERER_UBO_H
 #define LINE_RENDERER_UBO_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 #include "IRenderer.h"
 #include "RenderCommon.h"
 #include "Render/LineRenderer.h"

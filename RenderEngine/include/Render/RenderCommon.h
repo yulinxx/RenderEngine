@@ -1,7 +1,7 @@
 #ifndef RENDER_COMMON_H
 #define RENDER_COMMON_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 #include <QImage>
 #include <functional>
 #include <vector>

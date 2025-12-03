@@ -1,7 +1,7 @@
 #ifndef COLOR_H
 #define COLOR_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 #include <cstdint>
 
 namespace GLRhi

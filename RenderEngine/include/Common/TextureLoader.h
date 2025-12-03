@@ -1,7 +1,7 @@
 #ifndef TEXTURE_LOADER_H
 #define TEXTURE_LOADER_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 #include <QOpenGLFunctions_3_3_Core>
 #include <QImage>
 #include <QString>

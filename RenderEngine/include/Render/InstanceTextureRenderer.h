@@ -1,7 +1,7 @@
 #ifndef INSTANCE_TEXTURE_RENDERER_H
 #define INSTANCE_TEXTURE_RENDERER_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 #include "Render/IRenderer.h"
 #include "Render/RenderCommon.h"
 #include <vector>

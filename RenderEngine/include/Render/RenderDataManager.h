@@ -2,7 +2,7 @@
 #define RENDER_DATA_MANAGER_H
 
 #include "Render/RenderCommon.h"
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 
 namespace GLRhi
 {

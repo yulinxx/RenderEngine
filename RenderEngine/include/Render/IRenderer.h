@@ -1,7 +1,7 @@
 #ifndef IRENDERER_H
 #define IRENDERER_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
 #include "Common/Brush.h"

@@ -1,7 +1,7 @@
 #ifndef COLORLINEBRENDER_H
 #define COLORLINEBRENDER_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 #include "Render/IRenderer.h"
 #include "RenderCommon.h"
 

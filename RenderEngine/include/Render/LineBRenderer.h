@@ -1,7 +1,7 @@
 #ifndef LINEBRENDER_H
 #define LINEBRENDER_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 #include "IRenderer.h"
 #include "RenderCommon.h"
 

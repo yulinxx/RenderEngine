@@ -1,7 +1,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 #include <QPointF>
 #include <QSize>
 

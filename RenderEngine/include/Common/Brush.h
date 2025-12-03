@@ -1,7 +1,7 @@
 #ifndef RENDERBRUSH_H
 #define RENDERBRUSH_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 #include "Color.h"
 
 namespace GLRhi

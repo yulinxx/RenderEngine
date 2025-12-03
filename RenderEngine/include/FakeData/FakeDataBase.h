@@ -4,7 +4,7 @@
 #include <random>
 #include <vector>
 #include "Common/Color.h"
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 
 namespace GLRhi
 {

@@ -1,7 +1,7 @@
 #ifndef RENDERMANAGER_H
 #define RENDERMANAGER_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 #include "IRenderer.h"
 #include "CheckerboardRenderer.h"
 #include "LineRenderer.h"
