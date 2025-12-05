@@ -49,10 +49,10 @@ namespace GLRhi
         return !(*this == other);
     }
 
-    bool Color::operator<(const Color &other) const
+    bool Color::operator<(const Color& other) const
     {
         const float epsilon = 1e-5f;
-        
+
         if (std::abs(m_arrColor[RED] - other.m_arrColor[RED]) < epsilon &&
             std::abs(m_arrColor[GREEN] - other.m_arrColor[GREEN]) < epsilon &&
             std::abs(m_arrColor[BLUE] - other.m_arrColor[BLUE]) < epsilon &&
@@ -60,22 +60,22 @@ namespace GLRhi
         {
             return false;
         }
-        
+
         if (m_arrColor[RED] + epsilon < other.m_arrColor[RED])
             return true;
         if (other.m_arrColor[RED] + epsilon < m_arrColor[RED])
             return false;
-            
+
         if (m_arrColor[GREEN] + epsilon < other.m_arrColor[GREEN])
             return true;
         if (other.m_arrColor[GREEN] + epsilon < m_arrColor[GREEN])
             return false;
-            
+
         if (m_arrColor[BLUE] + epsilon < other.m_arrColor[BLUE])
             return true;
         if (other.m_arrColor[BLUE] + epsilon < m_arrColor[BLUE])
             return false;
-            
+
         return m_arrColor[ALPHA] < other.m_arrColor[ALPHA];
     }
 
@@ -187,15 +187,14 @@ namespace GLRhi
 
     uint32_t Color::toUInt32() const
     {
-// 将RGBA颜色值转换为32位整数，格式为0xAARRGGBB
-    auto toByte = [](float f) -> uint32_t {        
-        return static_cast<uint32_t>(std::lround(f * 255.0f));
-    };
-    
-    return (toByte(m_arrColor[ALPHA]) << 24) |
-           (toByte(m_arrColor[BLUE])  << 16) |
-           (toByte(m_arrColor[GREEN]) << 8) |
-           toByte(m_arrColor[RED]);
+        // 将RGBA颜色值转换为32位整数，格式为0xAARRGGBB
+        auto toByte = [](float f) -> uint32_t {
+            return static_cast<uint32_t>(std::lround(f * 255.0f));
+            };
+
+        return (toByte(m_arrColor[ALPHA]) << 24) |
+            (toByte(m_arrColor[BLUE]) << 16) |
+            (toByte(m_arrColor[GREEN]) << 8) |
+            toByte(m_arrColor[RED]);
     }
-    
 } // namespace GLRhi

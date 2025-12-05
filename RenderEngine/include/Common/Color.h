@@ -86,10 +86,9 @@ namespace GLRhi
         void setAlpha(float alpha);
 
         uint32_t toUInt32() const;
-private:
+    private:
         float m_arrColor[COLOR_COUNT] = { 1.0f, 1.0f, 1.0f, 1.0f }; // RGBA颜色数组
     };
-
 
     // 常用颜色定义
     static inline const Color BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };       // 黑色

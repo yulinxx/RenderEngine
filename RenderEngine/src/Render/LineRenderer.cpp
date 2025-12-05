@@ -111,7 +111,7 @@ namespace GLRhi
 
     void LineRenderer::cleanup()
     {
-        if (!m_gl) 
+        if (!m_gl)
             return;
 
         unbindABE();

@@ -89,7 +89,6 @@ namespace GLRhi
         GLuint m_uUboLoc = m_gl->glGetUniformBlockIndex(m_program->programId(), "uLineDataUBO");
         if (m_uUboLoc != GL_INVALID_INDEX)
         {
-
             // 没有在着色器中指定binding，则手动关联
             m_gl->glUniformBlockBinding(m_program->programId(), m_uUboLoc, 0);
 
@@ -167,7 +166,7 @@ namespace GLRhi
         for (size_t groupID = 0; groupID < polylines.size(); ++groupID)
         {
             const auto& group = polylines[groupID];
-            if (group.vCount.empty()) 
+            if (group.vCount.empty())
                 continue;
 
             uboColors[groupID * 4 + 0] = group.brush.r();

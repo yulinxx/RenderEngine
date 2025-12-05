@@ -57,6 +57,13 @@ namespace GLRhi
         if (!m_renderManager.initialize(this))
             qFatal("Initialize render manager failed!");
 
+        // 初始化伪数据生成器
+        m_dataGen = std::make_unique<FakeDataProvider>();
+        m_dataGen->initialize();
+
+        m_instanceLineFakeData = std::make_unique<InstanceLineFakeData>();
+        m_instanceTriangleFakeData = std::make_unique<InstanceTriangleFakeData>();
+
         // 初始化相机矩阵
         m_camera.updateMatrix(size());
         checkGLError("initializeGL");
@@ -209,7 +216,7 @@ namespace GLRhi
             else
             {
                 // 单独按F5: 默认行为
-                m_renderManager.genFakeData();
+                genFakeData();
                 qDebug() << "GenFakeData (F5)";
             }
             update();
@@ -353,7 +360,8 @@ namespace GLRhi
     void RenderWidget::setShowCheckerboard(bool b)
     {
         auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
-        if (board) { // 添加空指针检查
+        if (board)
+        { // 添加空指针检查
             board->setVisible(b);
             update();
         }
@@ -362,7 +370,8 @@ namespace GLRhi
     void RenderWidget::setCheckerboardSz(int n)
     {
         auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
-        if (board) { // 添加空指针检查
+        if (board)
+        { // 添加空指针检查
             board->setSize(static_cast<float>(n));
             update();
         }
@@ -371,7 +380,8 @@ namespace GLRhi
     void RenderWidget::setShowCheckerboardColor(Brush brushA, Brush brushB)
     {
         auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
-        if (board) { // 添加空指针检查
+        if (board)
+        { // 添加空指针检查
             board->setColors(brushA.getColor(), brushB.getColor());
             update();
         }
@@ -454,6 +464,81 @@ namespace GLRhi
         glDeleteFramebuffers(1, &fbo);
 
         doneCurrent();
+    }
+
+    void RenderWidget::genFakeData()
+    {
+        if (!m_dataGen)
+        {
+            m_dataGen = std::make_unique<FakeDataProvider>();
+            m_dataGen->initialize();
+        }
+
+        static bool b = true;
+        b = !b;
+        auto triRenderer = static_cast<TriangleRenderer*>(m_renderManager.getTriangleRenderer());
+        triRenderer->setBlendEnabled(b);
+
+        auto boardRenderer = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
+        boardRenderer->setVisible(true);
+
+        // 线段数据
+        if (1)
+        {
+            std::vector<PolylineData> vPLineDatas = m_dataGen->genLineData(60);
+            auto lineRenderer = static_cast<LineRenderer*>(m_renderManager.getLineRenderer());
+            lineRenderer->updateData(vPLineDatas);
+        }
+
+        // 三角形数据
+        if (0)
+        {
+            std::vector<TriangleData> vTriDatas = m_dataGen->genTriangleData();
+            auto triRenderer = static_cast<TriangleRenderer*>(m_renderManager.getTriangleRenderer());
+            triRenderer->updateData(vTriDatas);
+        }
+
+        // 纹理数据
+        if (0)
+        {
+            std::vector<TextureData> vTexDatas = m_dataGen->genTextureData();
+            auto texRenderer = static_cast<TextureRenderer*>(m_renderManager.getTextureRenderer());
+            texRenderer->updateData(vTexDatas);
+        }
+
+        // 实例化纹理数据
+        if (0)
+        {
+            GLuint textureArrayId = 0;
+            int textureCount = 0;
+            std::vector<InstanceTexData> vInstances =
+                m_dataGen->genInstanceTextureData(textureArrayId, textureCount);
+
+            if (textureArrayId > 0 && !vInstances.empty())
+            {
+                auto instanceTexRenderer = static_cast<InstanceTextureRenderer*>(m_renderManager.getInstanceTextureRenderer());
+                instanceTexRenderer->setTextureArray(textureArrayId, textureCount);
+                instanceTexRenderer->updateInstances(vInstances);
+            }
+        }
+
+        // 实例化线段数据
+        if (0)
+        {
+            m_instanceLineFakeData->genLines(1000, 0.001f, 0.003f);
+            std::vector<InstanceLineData>& lineData = m_instanceLineFakeData->getInstanceData();
+            auto instanceLineRenderer = static_cast<InstanceLineRenderer*>(m_renderManager.getInstanceLineRenderer());
+            instanceLineRenderer->updateInstances(lineData);
+        }
+
+        // 实例化三角形数据
+        if (0)
+        {
+            m_instanceTriangleFakeData->genTriangles(1000, 0.02f, 0.050f);
+            const auto& triangleData = m_instanceTriangleFakeData->getInstanceData();
+            auto instanceTriangleRenderer = static_cast<InstanceTriangleRenderer*>(m_renderManager.getInstanceTriangleRenderer());
+            instanceTriangleRenderer->updateInstances(triangleData);
+        }
     }
 
     void RenderWidget::setMousePosCb(const GetMousePtCb& cb)

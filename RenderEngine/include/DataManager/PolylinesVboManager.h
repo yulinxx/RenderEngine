@@ -1,7 +1,7 @@
 #ifndef POLYLINES_VBO_MANAGER_H
 #define POLYLINES_VBO_MANAGER_H
 
-#include "GLRenderExport.h"
+#include "Common/DllSet.h"
 #include <vector>
 #include <unordered_map>
 #include <shared_mutex>
@@ -87,7 +87,9 @@ namespace GLRhi
          * @return true成功添加，false失败（无效参数或ID已存在）
          */
         bool addPolyline(long long id, const std::vector<float>& vertices, const Color& color);
+        bool addPolyline(long long id, float* vertices, size_t vertexCount, const Color& color);
         size_t addPolylines(const std::vector<std::tuple<long long, std::vector<float>, Color>>& vPolylineDatas);
+        size_t addPolylines(const std::vector<std::tuple<long long, float*, size_t, Color>>& vPolylineDatas);
 
         /**
          * @brief 批量添加折线
@@ -116,6 +118,7 @@ namespace GLRhi
          * @return true更新成功，false未找到该ID或参数无效
          */
         bool updatePolyline(long long id, const std::vector<float>& vertices);
+        bool updatePolyline(long long id, float* vertices, size_t vertexCount);
 
         /**
          * @brief 设置折线可见性

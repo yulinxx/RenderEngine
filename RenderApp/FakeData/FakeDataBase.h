@@ -4,19 +4,24 @@
 #include <random>
 #include <vector>
 #include "Common/Color.h"
-#include "Common/DllSet.h"
 
 namespace GLRhi
 {
-    // Forward declaration of PIMPL struct
-    struct FakeDataBaseImpl;
+    struct FakeDataBaseImpl
+    {
+        std::random_device m_randomDevice;
+    };
 
-    class GLRENDER_API FakeDataBase
+    class FakeDataBase
     {
     public:
         FakeDataBase();
         // 内联实现析构函数以避免重复定义并确保正确释放资源
-        virtual ~FakeDataBase() { delete m_impl; }
+        virtual ~FakeDataBase()
+        {
+            if (m_impl)
+                delete m_impl;
+        }
 
     public:
         void setRange(float xMin, float xMax, float yMin, float yMax);
@@ -36,9 +41,9 @@ namespace GLRhi
         // Use static member functions to access static data instead of exposing STL containers directly
         static std::mt19937& getGenerator();
         static std::vector<Color>& getColorPool();
-        
+
         // Use PIMPL pattern for non-static STL member
-        FakeDataBaseImpl* m_impl;
+        FakeDataBaseImpl* m_impl = nullptr;
 
         static void initializeColorPool();
     };

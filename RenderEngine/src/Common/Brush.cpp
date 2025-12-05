@@ -8,18 +8,17 @@ namespace GLRhi
     {
     }
 
-    Brush::Brush(const Color &c, float depth /*=0.0f*/, int type /*=1*/)
+    Brush::Brush(const Color& c, float depth /*=0.0f*/, int type /*=1*/)
         : m_color(c), m_depth(depth), m_type(type)
     {
     }
-
 
     Brush::Brush(const Brush& other)
         : m_color(other.m_color), m_depth(other.m_depth), m_type(other.m_type)
     {
     }
 
-    Brush &Brush::operator=(const Brush &other)
+    Brush& Brush::operator=(const Brush& other)
     {
         if (this != &other)
         {
@@ -30,15 +29,15 @@ namespace GLRhi
         return *this;
     }
 
-    bool Brush::operator==(const Brush &other) const
+    bool Brush::operator==(const Brush& other) const
     {
         const float epsilon = 1e-6f;
         return (m_color == other.m_color &&
-                std::abs(m_depth - other.m_depth) < epsilon &&
-                m_type == other.m_type);
+            std::abs(m_depth - other.m_depth) < epsilon &&
+            m_type == other.m_type);
     }
 
-    bool Brush::operator!=(const Brush &other) const
+    bool Brush::operator!=(const Brush& other) const
     {
         return !(*this == other);
     }
@@ -53,12 +52,12 @@ namespace GLRhi
         m_color.setRgb(red, green, blue);
     }
 
-    void Brush::getRgb(float &red, float &green, float &blue) const
+    void Brush::getRgb(float& red, float& green, float& blue) const
     {
         m_color.getRgb(red, green, blue);
     }
 
-    void Brush::getRgba(float &red, float &green, float &blue, float &alpha) const
+    void Brush::getRgba(float& red, float& green, float& blue, float& alpha) const
     {
         m_color.getRgba(red, green, blue, alpha);
     }
@@ -69,7 +68,7 @@ namespace GLRhi
     }
 
     // 混合两个颜色
-    Brush Brush::blend(const Brush &other, float factor) const
+    Brush Brush::blend(const Brush& other, float factor) const
     {
         Color blendedColor = m_color.blend(other.m_color, factor);
 
@@ -114,11 +113,11 @@ namespace GLRhi
     {
         return m_color.a();
     }
-    const Color &Brush::getColor() const
+    const Color& Brush::getColor() const
     {
         return m_color;
     }
-    Color &Brush::getColor()
+    Color& Brush::getColor()
     {
         return m_color;
     }
@@ -156,7 +155,7 @@ namespace GLRhi
     {
         m_color.setAlpha(alpha);
     }
-    void Brush::setColor(const Color &color)
+    void Brush::setColor(const Color& color)
     {
         m_color = color;
     }

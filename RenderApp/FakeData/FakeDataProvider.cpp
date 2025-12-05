@@ -3,8 +3,6 @@
 #include "FakeData/FakePolyLineData.h"
 #include "FakeData/FakeTriangleData.h"
 
-//#include "FakeData/PolylineRenderTest.h" // 包含测试头文件
-
 #include <QDebug>
 #include <QString>
 
@@ -24,7 +22,7 @@ namespace GLRhi
     }
 
     std::vector<PolylineData> FakeDataProvider::genLineData(
-        size_t group /*=20*/, size_t nLineSz /*=100*/,  size_t minPts /*=2*/, size_t maxPts /*=10*/)
+        size_t group /*=20*/, size_t nLineSz /*=100*/, size_t minPts /*=2*/, size_t maxPts /*=10*/)
     {
         std::vector<PolylineData> vPLineDatas;
 

@@ -1,6 +1,4 @@
 #include "Render/RenderDataManager.h"
-#include "FakeData/FakeDataProvider.h"
-#include "FakeData/FakePolyLineData.h"
 #include "DataManager/PolylinesVboManager.h"
 
 #include <vector>
@@ -112,10 +110,37 @@ namespace GLRhi
 
         if (availableSlots > 0)
         {
-            FakeDataProvider fakeDataProvider;
-            std::vector<PolylineData> vPLineDatas = fakeDataProvider.genLineData(60);
-            m_vPolylineDatas.insert(m_vPolylineDatas.end(), vPLineDatas.begin(), vPLineDatas.end());
+            // 简单的随机线段生成，替代FakeDataProvider
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<float> posDist(-1.0f, 1.0f);
+            std::uniform_real_distribution<float> colorDist(0.0f, 1.0f);
+            std::uniform_int_distribution<int> pointCountDist(2, 10);
+            std::uniform_real_distribution<float> lineWidthDist(1.0f, 5.0f); // 随机线宽分布
 
+            // 生成少量随机线段
+            size_t newLineCount = std::min(availableSlots, static_cast<size_t>(10));
+            for (size_t i = 0; i < newLineCount; ++i)
+            {
+                PolylineData line;
+
+                // 随机生成线段的点
+                int pointCount = pointCountDist(gen);
+                for (int j = 0; j < pointCount; ++j)
+                {
+                    line.vVerts.push_back(posDist(gen)); // x
+                    line.vVerts.push_back(posDist(gen)); // y
+                    line.vVerts.push_back(0.0f);          // z
+                }
+
+                // 随机颜色
+                line.brush.set(colorDist(gen), colorDist(gen), colorDist(gen), 1.0f);
+
+                // 线宽已经在PolylinesVboManager中处理，不再需要在这里设置
+
+                // 添加到数据中
+                m_vPolylineDatas.push_back(line);
+            }
         }
         else
         {

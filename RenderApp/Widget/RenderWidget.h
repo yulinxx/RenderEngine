@@ -9,6 +9,10 @@
 #include "Render/RenderManager.h"
 #include "Render/RenderCommon.h"
 
+#include "FakeData/FakeDataProvider.h"
+#include "FakeData/InstanceLineFakeData.h"
+#include "FakeData/InstanceTriangleFakeData.h"
+
 namespace GLRhi
 {
     class RenderWidget final : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
@@ -76,6 +80,8 @@ namespace GLRhi
         void checkGLError(const QString& context = "");
 
     private:
+        void genFakeData();
+
         Camera m_camera;                    // 相机控制器
         RenderManager m_renderManager;      // 渲染管理器
         GetMousePtCb m_mouseCb = nullptr;   // 鼠标位置回调
@@ -83,6 +89,11 @@ namespace GLRhi
         bool m_bDragging = false;           // 拖动状态标记
         bool m_bAntiAlias = true;           // 抗锯齿启用状态
         bool m_bWireframeMode = false;      // 线框模式状态
+
+        // 伪数据生成器
+        std::unique_ptr<FakeDataProvider> m_dataGen;
+        std::unique_ptr<InstanceLineFakeData> m_instanceLineFakeData;
+        std::unique_ptr<InstanceTriangleFakeData> m_instanceTriangleFakeData;
     };
 }
 #endif // RENDER_WIDGET_H

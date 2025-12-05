@@ -12,7 +12,7 @@ endif()
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
-# 分别收集主程序和Widget目录下的源文件和头文件
+# 分别收集主程序、Widget和FakeData目录下的源文件和头文件
 file(GLOB MAIN_FILES
     "main.cpp"
 )
@@ -25,16 +25,27 @@ file(GLOB WIDGET_HEADERS
     "Widget/*.h"
 )
 
+file(GLOB FAKE_DATA_SOURCES
+    "FakeData/*.cpp"
+)
+
+file(GLOB FAKE_DATA_HEADERS
+    "FakeData/*.h"
+)
+
 # 合并所有文件
 set(APP_SOURCES
     ${MAIN_FILES}
     ${WIDGET_SOURCES}
     ${WIDGET_HEADERS}
+    ${FAKE_DATA_SOURCES}
+    ${FAKE_DATA_HEADERS}
 )
 
 # 为Visual Studio创建源代码过滤器
 source_group("Main" FILES ${MAIN_FILES})
 source_group("Widget" FILES ${WIDGET_SOURCES} ${WIDGET_HEADERS})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/FakeData" PREFIX "FakeData" FILES ${FAKE_DATA_SOURCES} ${FAKE_DATA_HEADERS})
 
 # 生成可执行文件
 add_executable(${PROJECT_NAME}
@@ -44,6 +55,7 @@ add_executable(${PROJECT_NAME}
 # 添加头文件包含目录
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/FakeData
     ${CMAKE_SOURCE_DIR}/RenderEngine/include
 )
 
@@ -54,6 +66,8 @@ target_link_directories(${PROJECT_NAME} PRIVATE
 
 # 确保RenderEngine库在当前项目之前构建
 add_dependencies(${PROJECT_NAME} RenderEngine)
+
+# 移除Stb依赖，因为项目不再使用它
 
 # 链接DLL和Qt库
 target_link_libraries(${PROJECT_NAME} PRIVATE

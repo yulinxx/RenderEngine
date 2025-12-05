@@ -4,9 +4,6 @@
 #include <cassert>
 #include <memory>
 
-#include "FakeData/FakePolyLineData.h"
-#include "FakeData/FakeTriangleData.h"
-#include "FakeData/FakeTextureData.h"
 #include "Common/TextureLoader.h"
 
 #include "Common/Tools.h"
@@ -45,10 +42,6 @@ namespace GLRhi
         m_instanceLineRenderer = std::make_unique<InstanceLineRenderer>();
         m_instanceTriangleRenderer = std::make_unique<InstanceTriangleRenderer>();
 
-        // 初始化伪数据生成器
-        m_instanceLineFakeData = std::make_unique<InstanceLineFakeData>();
-        m_instanceTriangleFakeData = std::make_unique<InstanceTriangleFakeData>();
-
         bool success = true;
         success &= m_boardRenderer->initialize(m_gl);
         success &= m_lineRenderer->initialize(m_gl);
@@ -67,7 +60,7 @@ namespace GLRhi
             return false;
         }
 
-        genFakeData();
+        // 移除了genFakeData调用，因为这个方法已经被移除
 
         return true;
     }
@@ -118,23 +111,7 @@ namespace GLRhi
         m_instanceLineRenderer->cleanup();
         m_instanceTriangleRenderer->cleanup();
 
-        if (m_instanceLineFakeData)
-        {
-            m_instanceLineFakeData->clear();
-            m_instanceLineFakeData = nullptr;
-        }
-
-        if (m_instanceTriangleFakeData)
-        {
-            m_instanceTriangleFakeData->clear();
-            m_instanceTriangleFakeData = nullptr;
-        }
-
-        if (m_dataGen)
-        {
-            m_dataGen->cleanup();
-            m_dataGen = nullptr;
-        }
+        // 移除了FakeData相关的清理代码，因为这些变量已经被移除
 
         m_gl = nullptr;
     }
@@ -199,90 +176,8 @@ namespace GLRhi
         return m_bgColor;
     }
 
-    void RenderManager::genFakeData()
-    {
-        if (!m_dataGen)
-        {
-            m_dataGen = std::make_unique<FakeDataProvider>();
-            m_dataGen->initialize();
-        }
-
-        static bool b = true;
-        b = !b;
-        static_cast<TriangleRenderer*>(m_triRenderer.get())->setBlendEnabled(b);
-
-        static_cast<CheckerboardRenderer*>(m_boardRenderer.get())->setVisible(true);
-
-        // 线段数据
-        if (1)
-        {
-            std::vector<PolylineData> vPLineDatas = m_dataGen->genLineData(60);
-
-            // static_cast<LineRendererUbo*>(m_lineUBORenderer.get())->updateData(vPLineDatas);
-            // m_dataManager.setPolylineDatas(vPLineDatas);
-
-            static_cast<LineRenderer*>(m_lineRenderer.get())->updateData(vPLineDatas);
-            m_dataManager.setPolylineDatas(vPLineDatas);
-        }
-
-        // 三角形数据
-        if (0)
-        {
-            std::vector<TriangleData> vTriDatas = m_dataGen->genTriangleData();
-            static_cast<TriangleRenderer*>(m_triRenderer.get())->updateData(vTriDatas);
-
-            m_dataManager.setTriangleDatas(vTriDatas);
-        }
-
-        // 纹理数据
-        if (0)
-        {
-            std::vector<TextureData> vTexDatas = m_dataGen->genTextureData();
-            static_cast<TextureRenderer*>(m_texRenderer.get())->updateData(vTexDatas);
-            m_dataManager.setTextureDatas(vTexDatas);
-        }
-
-        // 实例化纹理数据
-        if (0)
-        {
-            GLuint textureArrayId = 0;
-            int textureCount = 0;
-            std::vector<InstanceTexData> vInstances =
-                m_dataGen->genInstanceTextureData(textureArrayId, textureCount);
-
-            if (textureArrayId > 0 && !vInstances.empty())
-            {
-                static_cast<InstanceTextureRenderer*>(m_instancTexRenderer.get())
-                    ->setTextureArray(textureArrayId, textureCount);
-
-                static_cast<InstanceTextureRenderer*>(m_instancTexRenderer.get())->updateInstances(vInstances);
-
-                m_dataManager.setInstanceTextureDatas(vInstances);
-            }
-        }
-
-        // 实例化线段数据
-        if (0)
-        {
-            m_instanceLineFakeData->genLines(1000, 0.001f, 0.003f);
-            std::vector<InstanceLineData>& lineData = m_instanceLineFakeData->getInstanceData();
-            static_cast<InstanceLineRenderer*>(m_instanceLineRenderer.get())->updateInstances(lineData);
-
-            m_dataManager.setInstanceLineDatas(lineData);
-        }
-
-        // 实例化三角形数据
-        if (0)
-        {
-            m_instanceTriangleFakeData->genTriangles(1000, 0.02f, 0.050f);
-            const auto& triangleData = m_instanceTriangleFakeData->getInstanceData();
-            static_cast<InstanceTriangleRenderer*>(m_instanceTriangleRenderer.get())->updateInstances(triangleData);
-        }
-    }
-
     void RenderManager::dataCRUD()
     {
         m_dataManager.setLineDatasCRUD();
     }
-
 }

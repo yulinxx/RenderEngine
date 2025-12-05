@@ -19,7 +19,6 @@ find_package(Stb REQUIRED)
 file(GLOB_RECURSE RENDER_SOURCES
 "src/Common/*.cpp"
 "src/DataManager/*.cpp"
-"src/FakeData/*.cpp"
 "src/Render/*.cpp"
 "src/Shader/*.cpp"
 )
@@ -28,7 +27,6 @@ file(GLOB_RECURSE RENDER_HEADERS
 "include/*.h"
 "include/Common/*.h"
 "include/DataManager/*.h"
-"include/FakeData/*.h"
 "include/Render/*.h"
 "include/Shader/*.h"
 )

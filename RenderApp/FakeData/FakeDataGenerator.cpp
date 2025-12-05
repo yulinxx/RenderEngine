@@ -3,13 +3,6 @@
 // Define static members
 namespace GLRhi
 {
-    // Define PIMPL struct
-    struct FakeDataBaseImpl
-    {
-        std::random_device m_randomDevice;
-    };
-
-    // Static member variables
     std::mt19937 g_generator;
     std::vector<Color> g_colorPool;
 
@@ -26,9 +19,6 @@ namespace GLRhi
         }
     }
 
-    // 析构函数已在头文件中使用default关键字实现，避免重复定义
-
-    // Static accessor methods
     std::mt19937& FakeDataBase::getGenerator()
     {
         return g_generator;
@@ -95,13 +85,13 @@ namespace GLRhi
         colorPool.emplace_back(1.0f, 0.0f, 1.0f, 1.0f);     // 洋红色
         colorPool.emplace_back(0.0f, 1.0f, 1.0f, 1.0f);     // 青色
         colorPool.emplace_back(1.0f, 1.0f, 1.0f, 1.0f);    // 白色
-        
+
         // 灰色系列
         colorPool.emplace_back(0.0f, 0.0f, 0.0f, 1.0f);     // 黑色
         colorPool.emplace_back(0.5f, 0.5f, 0.5f, 1.0f);     // 灰色
         colorPool.emplace_back(0.25f, 0.25f, 0.25f, 1.0f);  // 深灰色
         colorPool.emplace_back(0.75f, 0.75f, 0.75f, 1.0f);  // 浅灰色
-        
+
         // 其他常用颜色
         colorPool.emplace_back(1.0f, 0.65f, 0.0f, 1.0f);    // 橙色
         colorPool.emplace_back(0.5f, 0.0f, 0.5f, 1.0f);     // 紫色
@@ -112,7 +102,6 @@ namespace GLRhi
         colorPool.emplace_back(0.0f, 0.0f, 0.5f, 1.0f);     // 藏青色
         colorPool.emplace_back(0.5f, 0.0f, 0.0f, 1.0f);     // 栗色
         colorPool.emplace_back(0.5f, 0.5f, 0.0f, 1.0f);     // 橄榄绿
-        
     }
 
     Color FakeDataBase::genRandomColor()

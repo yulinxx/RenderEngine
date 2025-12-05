@@ -25,7 +25,6 @@
 
 #include "DataManager/PolylinesVboManager.h"
 
-
 namespace GLRhi
 {
     // 类常量定义
@@ -194,7 +193,6 @@ namespace GLRhi
         return bAllSuccess;
     }
 
-
     /**
      * @brief 批量添加多条折线
      *
@@ -210,7 +208,6 @@ namespace GLRhi
     size_t PolylinesVboManager::addPolylines(
         const std::vector<std::tuple<long long, float*, size_t, Color>>& vPolylineDatas)
     {
-
         if (vPolylineDatas.empty() || !m_gl)
             return 0;
 
@@ -845,7 +842,6 @@ namespace GLRhi
                                 allIndices.push_back(static_cast<unsigned int>(currentBase + j));
                             }
 
-
                             currentBase += vertexCount;
                         }
                     }
@@ -1040,10 +1036,8 @@ namespace GLRhi
 
     void PolylinesVboManager::startBackgroundDefrag()
     {
-
         if (1)
         {
-
             m_bStopDefrag = false;
             m_defragThread = std::thread([this] {
                 while (!m_bStopDefrag)
@@ -1077,7 +1071,6 @@ namespace GLRhi
                     }
                 }
                 });
-
         }
         else
         {

@@ -17,9 +17,6 @@
 
 #include "Render/RenderDataManager.h"
 
-#include "FakeData/FakeDataProvider.h"
-#include "FakeData/InstanceLineFakeData.h"
-#include "FakeData/InstanceTriangleFakeData.h"
 #include <QOpenGLFunctions_3_3_Core>
 
 #include <memory>
@@ -58,8 +55,6 @@ namespace GLRhi
         void setBackgroundColor(const Brush& color);
         const Brush& getBackgroundColor() const;
 
-        // 生成测试数据，用于测试渲染
-        void genFakeData();
         void dataCRUD();
 
     private:
@@ -76,13 +71,6 @@ namespace GLRhi
         std::unique_ptr<IRenderer> m_instancTexRenderer{ nullptr };
         std::unique_ptr<IRenderer> m_instanceLineRenderer{ nullptr };
         std::unique_ptr<IRenderer> m_instanceTriangleRenderer{ nullptr };
-
-        // 实例化伪数据生成器
-        std::unique_ptr<InstanceLineFakeData> m_instanceLineFakeData{ nullptr };
-        std::unique_ptr<InstanceTriangleFakeData> m_instanceTriangleFakeData{ nullptr };
-
-        // 数据生成器
-        std::unique_ptr<FakeDataProvider> m_dataGen{ nullptr };
 
         RenderDataManager m_dataManager;
     };
