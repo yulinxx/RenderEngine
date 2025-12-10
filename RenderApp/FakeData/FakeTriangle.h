@@ -33,20 +33,30 @@ public:
     // 清空数据
     void clear() override;
 
-private:
-    // 生成单个凸多边形
-    void generateConvexPolygon(int vertexCount);
+    private:
+        // 生成单个凸多边形
+        void generateConvexPolygon(int vertexCount);
 
-    // 生成单个凹多边形
-    void generateConcavePolygon(int vertexCount);
+        // 生成单个凹多边形
+        void generateConcavePolygon(int vertexCount);
 
-    // 对当前多边形进行三角剖分
-    void triangulatePolygon(const std::vector<float>& polygonVertices);
+        // 对当前多边形进行三角剖分
+        void triangulatePolygon(const std::vector<float>& polygonVertices);
 
-private:
-    std::vector<float> m_vertices;        // 三角剖分后的顶点数据，格式：x, y, z
-    std::vector<uint32_t> m_indices;      // 三角剖分后的索引数据
-    std::vector<size_t> m_polygonInfos;   // 每个多边形的原始顶点数
-};
+        // 检查新多边形是否与已有多边形重叠
+        bool checkOverlap(float centerX, float centerY, float radius) const;
+
+        // 边界框结构
+        struct BoundingBox
+        {
+            float minX, maxX, minY, maxY;
+        };
+
+    private:
+        std::vector<float> m_vertices;        // 三角剖分后的顶点数据，格式：x, y, z
+        std::vector<uint32_t> m_indices;      // 三角剖分后的索引数据
+        std::vector<size_t> m_polygonInfos;   // 每个多边形的原始顶点数
+        std::vector<BoundingBox> m_boundingBoxes; // 每个多边形的边界框（用于碰撞检测）
+    };
 
 #endif // FAKE_TRIANGLE_H

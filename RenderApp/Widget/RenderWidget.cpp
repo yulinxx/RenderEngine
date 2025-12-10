@@ -498,7 +498,7 @@ namespace GLRhi
         if (1)
         {
             FakeTriangle fakeTriangle;
-            fakeTriangle.generatePolygons(1, 3, 12, 0.5f);
+            fakeTriangle.generatePolygons(10, 3, 12, 0.5f);
 
             GLRhi::Brush brush(0.8f, 0.4f, 0.1f, 1.0f, 0.0f);
             GLRhi::TriangleData data = convertToTriangleData(fakeTriangle, 1, brush);

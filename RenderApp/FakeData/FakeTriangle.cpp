@@ -34,20 +34,79 @@ void FakeTriangle::generatePolygons(size_t polygonCount, size_t minVertices, siz
 
     clear();
 
+    // 如果生成数量较少（<= 20），启用防重叠检测
+    bool enableOverlapCheck = (polygonCount <= 20);
+
     // 生成指定数量的多边形
     for (size_t i = 0; i < polygonCount; ++i)
     {
         int vertexCount = getRandomInt(static_cast<int>(minVertices), static_cast<int>(maxVertices));
-
-        // 根据凹多边形比例决定生成凸多边形还是凹多边形
-        float randValue = getRandomFloat(0.0f, 1.0f);
-        if (randValue < concaveRatio)
+        
+        // 如果启用防重叠，尝试多次生成不重叠的多边形
+        int maxRetries = enableOverlapCheck ? 50 : 1;
+        bool success = false;
+        
+        for (int retry = 0; retry < maxRetries; ++retry)
         {
-            generateConcavePolygon(vertexCount);
+            size_t vertexCountBefore = m_vertices.size();
+            size_t indexCountBefore = m_indices.size();
+            size_t bboxCountBefore = m_boundingBoxes.size();
+            
+            // 根据凹多边形比例决定生成凸多边形还是凹多边形
+            float randValue = getRandomFloat(0.0f, 1.0f);
+            if (randValue < concaveRatio)
+            {
+                generateConcavePolygon(vertexCount);
+            }
+            else
+            {
+                generateConvexPolygon(vertexCount);
+            }
+            
+            // 如果不需要检查重叠，或者没有重叠，则成功
+            if (!enableOverlapCheck || m_boundingBoxes.size() <= 1)
+            {
+                success = true;
+                break;
+            }
+            
+            // 检查新生成的多边形是否与已有多边形重叠
+            const auto& newBBox = m_boundingBoxes.back();
+            bool hasOverlap = false;
+            
+            for (size_t j = 0; j < m_boundingBoxes.size() - 1; ++j)
+            {
+                const auto& existingBBox = m_boundingBoxes[j];
+                
+                // AABB 碰撞检测
+                if (!(newBBox.maxX < existingBBox.minX || 
+                      newBBox.minX > existingBBox.maxX ||
+                      newBBox.maxY < existingBBox.minY || 
+                      newBBox.minY > existingBBox.maxY))
+                {
+                    hasOverlap = true;
+                    break;
+                }
+            }
+            
+            if (!hasOverlap)
+            {
+                success = true;
+                break;
+            }
+            
+            // 有重叠，回退并重试
+            m_vertices.resize(vertexCountBefore);
+            m_indices.resize(indexCountBefore);
+            m_boundingBoxes.resize(bboxCountBefore);
+            
+            if (m_polygonInfos.size() > 0)
+                m_polygonInfos.pop_back();
         }
-        else
+        
+        if (!success && enableOverlapCheck)
         {
-            generateConvexPolygon(vertexCount);
+            qDebug() << "Warning: Failed to generate non-overlapping polygon after" << maxRetries << "retries";
         }
     }
 }
@@ -72,6 +131,7 @@ void FakeTriangle::clear()
     m_vertices.clear();
     m_indices.clear();
     m_polygonInfos.clear();
+    m_boundingBoxes.clear();
 }
 
 void FakeTriangle::generateConvexPolygon(int vertexCount)
@@ -215,7 +275,28 @@ void FakeTriangle::triangulatePolygon(const std::vector<float>& polygonVertices)
         m_indices.push_back(vertexOffset + index);
     }
 
-    // 调试信息
-    qDebug() << "Generated polygon with" << (polygonVertices.size() / 3)
-        << "vertices, triangulated into" << (triangleIndices.size() / 3) << "triangles";
-}
+        // 计算并保存边界框
+        if (!polygonVertices.empty())
+        {
+            BoundingBox bbox;
+            bbox.minX = bbox.maxX = polygonVertices[0];
+            bbox.minY = bbox.maxY = polygonVertices[1];
+            
+            for (size_t i = 0; i < polygonVertices.size(); i += 3)
+            {
+                float x = polygonVertices[i];
+                float y = polygonVertices[i + 1];
+                
+                bbox.minX = std::min(bbox.minX, x);
+                bbox.maxX = std::max(bbox.maxX, x);
+                bbox.minY = std::min(bbox.minY, y);
+                bbox.maxY = std::max(bbox.maxY, y);
+            }
+            
+            m_boundingBoxes.push_back(bbox);
+        }
+        
+        // 调试信息
+        qDebug() << "Generated polygon with" << (polygonVertices.size() / 3) 
+                 << "vertices, triangulated into" << (triangleIndices.size() / 3) << "triangles";
+    }
