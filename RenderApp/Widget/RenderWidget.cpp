@@ -480,7 +480,7 @@ namespace GLRhi
         boardRenderer->setVisible(true);
 
         // 线段数据
-        if (1)
+        if (0)
         {
             std::vector<PolylineData> vPLineDatas = m_dataGen->genLineData(60);
             auto lineRenderer = static_cast<LineRenderer*>(m_renderManager.getLineRenderer());
@@ -488,7 +488,7 @@ namespace GLRhi
         }
 
         // 三角形数据
-        if (1)
+        if (0)
         {
             std::vector<TriangleData> vTriDatas = m_dataGen->genTriangleData();
             auto triRenderer = static_cast<TriangleRenderer*>(m_renderManager.getTriangleRenderer());
@@ -498,8 +498,12 @@ namespace GLRhi
         if (1)
         {
             FakeTriangle fakeTriangle;
-            fakeTriangle.generatePolygons(20, 3, 12, 0.5f);
-     
+            fakeTriangle.generatePolygons(1, 3, 12, 0.5f);
+
+            GLRhi::Brush brush(0.8f, 0.4f, 0.1f, 1.0f, 0.0f);
+            GLRhi::TriangleData data = convertToTriangleData(fakeTriangle, 1, brush);
+            triRenderer->updateData({ data });
+
         }
 
         // 纹理数据
