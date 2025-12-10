@@ -1,8 +1,8 @@
 // TriangleRenderExample.cpp
 // 这是一个使用示例，展示如何使用 FakeTriangle 和 TriangleRenderer
 
-#include "FakeData/FakeTriangle.h"
-#include "FakeData/FakeTriangleHelper.h"
+#include "FakeData/fakeTriangleMesh.h"
+#include "FakeData/fakeTriangleMeshHelper.h"
 #include "Render/TriangleRenderer.h"
 #include "Common/Brush.h"
 
@@ -16,7 +16,7 @@ public:
         m_triangleRenderer.initialize(gl);
 
         // 2. 生成随机多边形数据
-        FakeTriangle fakeTriangle;
+        FakeTriangleMesh fakeTriangle;
         fakeTriangle.setRange(-1.0f, 1.0f, -1.0f, 1.0f);
 
         // 生成10个多边形，每个3-10个顶点，50%为凹多边形
@@ -74,7 +74,7 @@ public:
 
         for (size_t i = 0; i < configs.size(); ++i)
         {
-            FakeTriangle fakeTriangle;
+            FakeTriangleMesh fakeTriangle;
             fakeTriangle.setRange(-1.0f, 1.0f, -1.0f, 1.0f);
             fakeTriangle.generatePolygons(configs[i].polygonCount, 4, 8, configs[i].concaveRatio);
 

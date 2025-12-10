@@ -13,8 +13,8 @@
 #include "FakeData/InstanceLineFakeData.h"
 #include "FakeData/InstanceTriangleFakeData.h"
 
-#include "FakeData/FakeTriangle.h"
-#include "FakeData/FakeTriangleHelper.h"
+#include "FakeData/FakeTriangleMesh.h"
+#include "FakeData/FakeTriangleMeshHelper.h"
 
 namespace GLRhi
 {

@@ -1,14 +1,14 @@
-#ifndef FAKE_TRIANGLE_H
-#define FAKE_TRIANGLE_H
+#ifndef FAKE_TRIANGLE_MESH_H
+#define FAKE_TRIANGLE_MESH_H
 
 #include <vector>
 #include "FakeDataBase.h"
 
-class FakeTriangle final : public FakeDataBase
+class FakeTriangleMesh final : public FakeDataBase
 {
 public:
-    FakeTriangle();
-    ~FakeTriangle() override;
+    FakeTriangleMesh();
+    ~FakeTriangleMesh() override;
 
 public:
     // 生成指定数量的多边形并进行三角剖分
@@ -59,4 +59,4 @@ public:
         std::vector<BoundingBox> m_boundingBoxes; // 每个多边形的边界框（用于碰撞检测）
     };
 
-#endif // FAKE_TRIANGLE_H
+#endif // FAKE_TRIANGLE_MESH_H

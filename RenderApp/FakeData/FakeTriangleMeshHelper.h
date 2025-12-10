@@ -1,12 +1,12 @@
-#ifndef FAKE_TRIANGLE_HELPER_H
-#define FAKE_TRIANGLE_HELPER_H
+#ifndef FAKE_TRIANGLE_MESH_HELPER_H
+#define FAKE_TRIANGLE_MESH_HELPER_H
 
-#include "FakeTriangle.h"
+#include "FakeTriangleMesh.h"
 #include "Render/RenderCommon.h"
 #include <vector>
 
-// 辅助函数：将 FakeTriangle 生成的数据转换为 GLRhi::TriangleData 格式
-inline GLRhi::TriangleData convertToTriangleData(const FakeTriangle& fakeTriangle,
+// 辅助函数：将 FakeTriangleMesh 生成的数据转换为 GLRhi::TriangleData 格式
+inline GLRhi::TriangleData convertToTriangleData(const FakeTriangleMesh& fakeTriangle,
     long long id = 0,
     const GLRhi::Brush& brush = GLRhi::Brush{ 1.0f, 0.5f, 0.0f, 1.0f, 0.0f })
 {
@@ -18,8 +18,8 @@ inline GLRhi::TriangleData convertToTriangleData(const FakeTriangle& fakeTriangl
     return triangleData;
 }
 
-// 辅助函数：批量转换多个 FakeTriangle 数据
-inline std::vector<GLRhi::TriangleData> convertToTriangleDatas(const std::vector<FakeTriangle>& fakeTriangles,
+// 辅助函数：批量转换多个 FakeTriangleMesh 数据
+inline std::vector<GLRhi::TriangleData> convertToTriangleDatas(const std::vector<FakeTriangleMesh>& fakeTriangles,
     const std::vector<GLRhi::Brush>& brushes = {})
 {
     std::vector<GLRhi::TriangleData> triangleDatas;
@@ -34,4 +34,4 @@ inline std::vector<GLRhi::TriangleData> convertToTriangleDatas(const std::vector
     return triangleDatas;
 }
 
-#endif // FAKE_TRIANGLE_HELPER_H
+#endif // FAKE_TRIANGLE_MESH_HELPER_H

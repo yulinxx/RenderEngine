@@ -1,4 +1,4 @@
-#include "FakeData/FakeTriangle.h"
+#include "FakeData/FakeTriangleMesh.h"
 #include "3rdpart/earcut.hpp"
 #include <array>
 #include <cmath>
@@ -8,18 +8,18 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-FakeTriangle::FakeTriangle()
+FakeTriangleMesh::FakeTriangleMesh()
 {
     // 可以设置默认范围
     // setRange(-1000.0f, 1000.0f, -1000.0f, 1000.0f);
 }
 
-FakeTriangle::~FakeTriangle()
+FakeTriangleMesh::~FakeTriangleMesh()
 {
     clear();
 }
 
-void FakeTriangle::generatePolygons(size_t polygonCount, size_t minVertices, size_t maxVertices, float concaveRatio)
+void FakeTriangleMesh::generatePolygons(size_t polygonCount, size_t minVertices, size_t maxVertices, float concaveRatio)
 {
     if (minVertices < 3)
         minVertices = 3;
@@ -111,22 +111,22 @@ void FakeTriangle::generatePolygons(size_t polygonCount, size_t minVertices, siz
     }
 }
 
-const std::vector<float>& FakeTriangle::getVertices() const
+const std::vector<float>& FakeTriangleMesh::getVertices() const
 {
     return m_vertices;
 }
 
-const std::vector<uint32_t>& FakeTriangle::getIndices() const
+const std::vector<uint32_t>& FakeTriangleMesh::getIndices() const
 {
     return m_indices;
 }
 
-const std::vector<size_t>& FakeTriangle::getPolygonInfos() const
+const std::vector<size_t>& FakeTriangleMesh::getPolygonInfos() const
 {
     return m_polygonInfos;
 }
 
-void FakeTriangle::clear()
+void FakeTriangleMesh::clear()
 {
     m_vertices.clear();
     m_indices.clear();
@@ -134,7 +134,7 @@ void FakeTriangle::clear()
     m_boundingBoxes.clear();
 }
 
-void FakeTriangle::generateConvexPolygon(int vertexCount)
+void FakeTriangleMesh::generateConvexPolygon(int vertexCount)
 {
     if (vertexCount < 3)
         vertexCount = 3;
@@ -182,7 +182,7 @@ void FakeTriangle::generateConvexPolygon(int vertexCount)
     triangulatePolygon(polygonVertices);
 }
 
-void FakeTriangle::generateConcavePolygon(int vertexCount)
+void FakeTriangleMesh::generateConcavePolygon(int vertexCount)
 {
     if (vertexCount < 3)
         vertexCount = 3;
@@ -239,7 +239,7 @@ void FakeTriangle::generateConcavePolygon(int vertexCount)
     triangulatePolygon(polygonVertices);
 }
 
-void FakeTriangle::triangulatePolygon(const std::vector<float>& polygonVertices)
+void FakeTriangleMesh::triangulatePolygon(const std::vector<float>& polygonVertices)
 {
     if (polygonVertices.size() < 9) // 至少需要3个顶点（每个顶点3个坐标）
         return;
