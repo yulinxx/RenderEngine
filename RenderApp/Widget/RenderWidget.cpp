@@ -60,10 +60,10 @@ namespace GLRhi
         // 初始化伪数据生成器
         m_dataGen = std::make_unique<FakeDataProvider>();
         m_dataGen->initialize();
-
+        
         m_instanceLineFakeData = std::make_unique<InstanceLineFakeData>();
         m_instanceTriangleFakeData = std::make_unique<InstanceTriangleFakeData>();
-
+        
         // 初始化相机矩阵
         m_camera.updateMatrix(size());
         checkGLError("initializeGL");
@@ -360,8 +360,7 @@ namespace GLRhi
     void RenderWidget::setShowCheckerboard(bool b)
     {
         auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
-        if (board)
-        { // 添加空指针检查
+        if (board) { // 添加空指针检查
             board->setVisible(b);
             update();
         }
@@ -370,8 +369,7 @@ namespace GLRhi
     void RenderWidget::setCheckerboardSz(int n)
     {
         auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
-        if (board)
-        { // 添加空指针检查
+        if (board) { // 添加空指针检查
             board->setSize(static_cast<float>(n));
             update();
         }
@@ -380,8 +378,7 @@ namespace GLRhi
     void RenderWidget::setShowCheckerboardColor(Brush brushA, Brush brushB)
     {
         auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
-        if (board)
-        { // 添加空指针检查
+        if (board) { // 添加空指针检查
             board->setColors(brushA.getColor(), brushB.getColor());
             update();
         }
@@ -491,11 +488,18 @@ namespace GLRhi
         }
 
         // 三角形数据
-        if (0)
+        if (1)
         {
             std::vector<TriangleData> vTriDatas = m_dataGen->genTriangleData();
             auto triRenderer = static_cast<TriangleRenderer*>(m_renderManager.getTriangleRenderer());
             triRenderer->updateData(vTriDatas);
+        }
+        // 三角剖分数据
+        if (1)
+        {
+            FakeTriangle fakeTriangle;
+            fakeTriangle.generatePolygons(20, 3, 12, 0.5f);
+     
         }
 
         // 纹理数据
@@ -511,7 +515,7 @@ namespace GLRhi
         {
             GLuint textureArrayId = 0;
             int textureCount = 0;
-            std::vector<InstanceTexData> vInstances =
+            std::vector<InstanceTexData> vInstances = 
                 m_dataGen->genInstanceTextureData(textureArrayId, textureCount);
 
             if (textureArrayId > 0 && !vInstances.empty())

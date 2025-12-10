@@ -13,6 +13,9 @@
 #include "FakeData/InstanceLineFakeData.h"
 #include "FakeData/InstanceTriangleFakeData.h"
 
+#include "FakeData/FakeTriangle.h"
+#include "FakeData/FakeTriangleHelper.h"
+
 namespace GLRhi
 {
     class RenderWidget final : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
