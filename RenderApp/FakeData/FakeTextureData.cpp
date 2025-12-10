@@ -5,6 +5,8 @@
 #include <ctime>
 #include <QDebug>
 
+using namespace GLRhi;
+
 FakeTextureData::FakeTextureData()
 {
     setRange(-1.0f, 1.0f, -1.0f, 1.0f);
