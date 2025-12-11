@@ -9,15 +9,20 @@ namespace GLRhi
         cleanup();
     }
 
-    bool ImageRenderer::initialize(QOpenGLFunctions_3_3_Core* gl)
+    bool ImageRenderer::initialize(QOpenGLContext* context)
     {
-        m_gl = gl;
+        if (!context)
+        {
+            assert(false && "ImageRenderer::initialize: context is null");
+            return false;
+        }
+        m_context = context;
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         if (!m_gl)
         {
             assert(false && "ImageRenderer initialize: OpenGL functions not available");
             return false;
         }
-
         m_gl->glGenVertexArrays(1, &m_nVao);
         m_gl->glGenBuffers(1, &m_nVbo);
 
@@ -72,7 +77,7 @@ namespace GLRhi
         return true;
     }
 
-    void ImageRenderer::render(const float* cameraMat)
+    void ImageRenderer::render(const float* matMVP)
     {
         if (!m_gl || !m_program || m_vImageInfos.empty() || !m_nVao || !m_nVbo)
             return;
@@ -81,7 +86,7 @@ namespace GLRhi
         m_program->bind();
 
         if (m_uCameraMatLoc >= 0)
-            m_program->setUniformValue(m_uCameraMatLoc, QMatrix3x3(cameraMat));
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix3x3(matMVP));
 
         m_gl->glBindVertexArray(m_nVao);
 
@@ -89,19 +94,19 @@ namespace GLRhi
 
         for (const auto& img : m_vImageInfos)
         {
-            if (!img.textureId || img.vertexCount == 0)
+            if (!img.textureId || img.count == 0)
                 continue;
 
             if (m_uDepthLoc >= 0)
                 m_program->setUniformValue(m_uDepthLoc, img.depth);
 
-            m_gl->glBufferData(GL_ARRAY_BUFFER, img.vertices.size() * sizeof(float),
-                img.vertices.data(), GL_DYNAMIC_DRAW);
+            m_gl->glBufferData(GL_ARRAY_BUFFER, img.verts.size() * sizeof(float),
+                img.verts.data(), GL_DYNAMIC_DRAW);
 
             m_gl->glActiveTexture(GL_TEXTURE0);
             m_gl->glBindTexture(GL_TEXTURE_2D, img.textureId);
 
-            m_gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(img.vertexCount));
+            m_gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(img.count));
             m_gl->glBindTexture(GL_TEXTURE_2D, 0);
         }
 
@@ -129,11 +134,11 @@ namespace GLRhi
         m_gl = nullptr;
     }
 
-    void ImageRenderer::updateData(const float* vertices, size_t vertexCount,
+    void ImageRenderer::updateData(const float* verts, size_t count,
         const unsigned char* imgData, int width, int height,
         float depth)
     {
-        if (!m_gl || !vertices || vertexCount == 0 || !imgData || width <= 0 || height <= 0)
+        if (!m_gl || !verts || count == 0 || !imgData || width <= 0 || height <= 0)
             return;
 
         GLuint textureId;
@@ -149,11 +154,11 @@ namespace GLRhi
         m_gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         m_gl->glBindTexture(GL_TEXTURE_2D, 0);
 
-        ImageInfo img;
+        ImageInfoEx img;
         img.textureId = textureId;
-        img.vertexCount = vertexCount;
-        img.vertices.assign(vertices, vertices + vertexCount * 4); // 每个顶点4个float（x,y,u,v）
-        img.depth = depth;                                         // 设置图片深度值
+        img.count = count;
+        img.verts.assign(verts, verts + count * 4); 
+        img.depth = depth;
         m_vImageInfos.push_back(std::move(img));
     }
 }

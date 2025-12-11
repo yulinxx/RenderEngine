@@ -1,5 +1,6 @@
 #include "Render/TriangleRenderer.h"
 #include "Shader/BaseTriangleShader.h"
+
 #include <QDebug>
 #include <cassert>
 
@@ -10,37 +11,51 @@ namespace GLRhi
         cleanup();
     }
 
-    bool TriangleRenderer::initialize(QOpenGLFunctions_3_3_Core* gl)
+    bool TriangleRenderer::initialize(QOpenGLContext* context)
     {
-        m_gl = gl;
+        m_gl = context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         if (!m_gl)
         {
-            assert(false && "TriangleRenderer::initialize: OpenGL functions not available");
+            assert(false && "TriangleRenderer: OpenGL functions not available");
             return false;
         }
-
+        m_context = context;
         m_program = new QOpenGLShaderProgram;
-
         if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, baseTriangleVS) ||
             !m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, baseTriangleFS) ||
             !m_program->link())
         {
-            deleteProgram(m_program);
+            cleanup();
             assert(false && "TriangleRenderer: Shader link failed");
             return false;
         }
 
-        m_uColorLoc = m_program->uniformLocation("uColor");
-        m_uDepthLoc = m_program->uniformLocation("uDepth");
-        m_uCameraMatLoc = m_program->uniformLocation("uCameraMat");
+        m_program->bind();
 
-        bool bUniformError = (m_uColorLoc < 0) || (m_uDepthLoc < 0) || (m_uCameraMatLoc < 0);
+        m_uCameraMatLoc = m_program->uniformLocation("uCameraMat");
+        m_uDepthLoc = m_program->uniformLocation("uDepth");
+        m_uColorLoc = m_program->uniformLocation("uColor");
+
+        bool bUniformError = (m_uCameraMatLoc < 0) || (m_uDepthLoc < 0) || (m_uColorLoc < 0);
         if (bUniformError)
         {
-            deleteProgram(m_program);
+            cleanup();
             assert(false && "TriangleRenderer: Failed to get uniform locations");
             return false;
         }
+
+        m_program->release();
+
+        m_gl->glGenVertexArrays(1, &m_nVao);
+        m_gl->glGenBuffers(1, &m_nVbo);
+        m_gl->glGenBuffers(1, &m_nEbo);
+
+        m_gl->glBindVertexArray(m_nVao);
+        m_gl->glBindBuffer(GL_ARRAY_BUFFER, m_nVbo);
+        m_gl->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        m_gl->glEnableVertexAttribArray(0);
+
+        m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_nEbo);
 
         GLenum error = m_gl->glGetError();
         if (error != GL_NO_ERROR)
@@ -50,64 +65,114 @@ namespace GLRhi
             return false;
         }
 
+        m_gl->glBindVertexArray(0);
+
         return true;
     }
 
-    void TriangleRenderer::render(const float* cameraMat)
+    void TriangleRenderer::updateData(const std::vector<TriangleData>& vTriDatas)
     {
-        if (m_nVao == 0 || m_nVbo == 0 || m_nEbo == 0 ||
-            m_vTriangleBrush.empty() || m_vIndexCounts.empty() || m_vIndexOffsets.empty())
-        {
+        if (!m_gl || !m_nVao)
             return;
+
+        //std::sort(vTriDatas.begin(), vTriDatas.end(), [](const TriangleData& a, const TriangleData& b) {
+        //    if (a.brush.d() != b.brush.d())
+        //        return a.brush.d() < b.brush.d();
+
+        //    return a.brush.a() >= 1.0f && b.brush.a() < 1.0f; }
+        //);
+
+        size_t nTotalVertices = 0;
+        size_t nTotalIndices = 0;
+        m_vecBatches.clear();
+        m_vecBatches.reserve(vTriDatas.size());
+
+        for (const auto& triData : vTriDatas)
+        {
+            Batch batch;
+            batch.indexOffset = static_cast<unsigned int>(nTotalIndices);
+            batch.indexCount = static_cast<unsigned int>(triData.vIndices.size());
+            batch.brush = triData.brush;
+            m_vecBatches.emplace_back(batch);
+
+            nTotalVertices += triData.vVerts.size() / 3;
+            nTotalIndices += triData.vIndices.size();
         }
 
-        if (m_vTriangleBrush.size() != m_vIndexCounts.size() ||
-            m_vTriangleBrush.size() != m_vIndexOffsets.size())
+        std::vector<float> allVertices;
+        allVertices.reserve(nTotalVertices * 3);
+        for (const auto& triData : vTriDatas)
+            allVertices.insert(allVertices.end(), triData.vVerts.begin(), triData.vVerts.end());
+
+        std::vector<unsigned int> allIndices;
+        allIndices.reserve(nTotalIndices);
+
+        unsigned int vertexOffset = 0;
+        for (const auto& triData : vTriDatas)
         {
-            qWarning() << "TriangleRenderer::render: container size mismatch!";
-            return;
+            for (unsigned int index : triData.vIndices)
+                allIndices.push_back(index + vertexOffset);
+
+            vertexOffset += static_cast<unsigned int>(triData.vVerts.size()) / 3;
         }
+
+        m_gl->glBindVertexArray(m_nVao);
+
+        m_gl->glBindBuffer(GL_ARRAY_BUFFER, m_nVbo);
+        m_gl->glBufferData(GL_ARRAY_BUFFER, allVertices.size() * sizeof(float),
+            allVertices.data(), GL_STATIC_DRAW);
+
+        m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_nEbo);
+        m_gl->glBufferData(GL_ELEMENT_ARRAY_BUFFER, allIndices.size() * sizeof(unsigned int),
+            allIndices.data(), GL_STATIC_DRAW);
+
+        m_gl->glBindVertexArray(0);
+    }
+
+    void TriangleRenderer::render(const float* matMVP)
+    {
+        if (!m_gl || !m_program || m_vecBatches.empty())
+            return;
 
         m_program->bind();
+        m_gl->glBindVertexArray(m_nVao);
+        m_gl->glEnable(GL_DEPTH_TEST);
 
-        if (m_uCameraMatLoc >= 0)
-            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
-
-        // 设置混合模式
         if (m_bBlend)
         {
             m_gl->glEnable(GL_BLEND);
             m_gl->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            m_gl->glBlendEquation(GL_FUNC_ADD);
         }
         else
         {
             m_gl->glDisable(GL_BLEND);
         }
 
-        m_gl->glBindVertexArray(m_nVao);
-        m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_nEbo);
+        if (m_uCameraMatLoc >= 0 && matMVP)
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(matMVP));
 
-        // 渲染每个三角形组
-        for (size_t i = 0; i < m_vTriangleBrush.size(); ++i)
+        for (const auto& batch : m_vecBatches)
         {
-            const auto& brush = m_vTriangleBrush[i];
-            if (m_vIndexCounts[i] <= 0)
-                continue;
+            const auto& b = batch.brush;
+            m_program->setUniformValue(m_uDepthLoc, b.d());
 
-            m_program->setUniformValue(m_uDepthLoc, brush.d());
-            m_program->setUniformValue(m_uColorLoc, QVector4D(brush.r(), brush.g(), brush.b(), brush.a()));
+            if (m_bBlend)
+            {
+                m_program->setUniformValue(m_uColorLoc,
+                    QVector4D(b.r(), b.g(), b.b(), b.a()));
+            }
+            else
+            {
+                m_program->setUniformValue(m_uColorLoc,
+                    QVector4D(b.r(), b.g(), b.b(), 1.0f));
+            }
 
-            void* byteOffset = reinterpret_cast<void*>(m_vIndexOffsets[i] * sizeof(GLuint));
-            m_gl->glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_vIndexCounts[i]), GL_UNSIGNED_INT, byteOffset);
+            m_gl->glDrawElements(GL_TRIANGLES, batch.indexCount, GL_UNSIGNED_INT,
+                (void*)(batch.indexOffset * sizeof(unsigned int)));
         }
 
         m_gl->glBindVertexArray(0);
-
-        if (m_bBlend)
-        {
-            m_gl->glDisable(GL_BLEND);
-        }
-
         m_program->release();
     }
 
@@ -116,111 +181,11 @@ namespace GLRhi
         if (!m_gl)
             return;
 
-        unbindABE();
         deleteVaoVbo(m_nVao, m_nVbo);
         deleteEbo(m_nEbo);
         deleteProgram(m_program);
 
-        m_vTriangleBrush.clear();
-        m_vTriangleBrush.shrink_to_fit();
-
-        m_vIndexOffsets.clear();
-        m_vIndexOffsets.shrink_to_fit();
-
-        m_vIndexCounts.clear();
-        m_vIndexCounts.shrink_to_fit();
-
         m_gl = nullptr;
-    }
-
-    void TriangleRenderer::updateData(const std::vector<TriangleData>& triangleDatas)
-    {
-        if (!m_gl || triangleDatas.empty())
-        {
-            cleanup();
-            return;
-        }
-
-        unbindABE();
-        deleteVaoVbo(m_nVao, m_nVbo);
-        deleteEbo(m_nEbo);
-
-        m_vTriangleBrush.clear();
-        m_vIndexCounts.clear();
-        m_vIndexOffsets.clear();
-
-        std::vector<float> vAllVertices;
-        std::vector<GLuint> vAllIndices;
-        GLuint nVertexOffset = 0;
-        GLuint nIndexOffset = 0;
-
-        for (const auto& triangleData : triangleDatas)
-        {
-            const auto& verts = triangleData.vVerts;
-            const auto& indices = triangleData.vIndices;
-
-            if (verts.empty() || verts.size() % 3 != 0)
-            {
-                qWarning() << "Skipping invalid triangle data: vertex count not divisible by 3";
-                continue;
-            }
-
-            if (indices.empty() || indices.size() % 3 != 0)
-            {
-                qWarning() << "Skipping invalid triangle data: index count not divisible by 3";
-                continue;
-            }
-
-            // 添加画刷信息
-            m_vTriangleBrush.push_back(triangleData.brush);
-
-            // 记录当前组的索引偏移和数量
-            m_vIndexOffsets.push_back(nIndexOffset);
-            m_vIndexCounts.push_back(static_cast<GLuint>(indices.size()));
-
-            // 添加顶点数据
-            vAllVertices.insert(vAllVertices.end(), verts.begin(), verts.end());
-
-            // 添加索引数据（需要加上顶点偏移）
-            for (GLuint index : indices)
-            {
-                vAllIndices.push_back(nVertexOffset + index);
-            }
-
-            // 更新偏移量
-            nVertexOffset += static_cast<GLuint>(verts.size() / 3);
-            nIndexOffset += static_cast<GLuint>(indices.size());
-        }
-
-        if (vAllVertices.empty() || vAllIndices.empty())
-        {
-            qWarning() << "TriangleRenderer::updateData: No valid data to render";
-            return;
-        }
-
-        // 创建VAO
-        m_gl->glGenVertexArrays(1, &m_nVao);
-        m_gl->glBindVertexArray(m_nVao);
-
-        // 创建并填充VBO
-        m_gl->glGenBuffers(1, &m_nVbo);
-        m_gl->glBindBuffer(GL_ARRAY_BUFFER, m_nVbo);
-        m_gl->glBufferData(GL_ARRAY_BUFFER, vAllVertices.size() * sizeof(float), vAllVertices.data(), GL_STATIC_DRAW);
-
-        // 设置顶点属性指针
-        m_gl->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-        m_gl->glEnableVertexAttribArray(0);
-
-        // 创建并填充EBO
-        m_gl->glGenBuffers(1, &m_nEbo);
-        m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_nEbo);
-        m_gl->glBufferData(GL_ELEMENT_ARRAY_BUFFER, vAllIndices.size() * sizeof(GLuint), vAllIndices.data(), GL_STATIC_DRAW);
-
-        unbindABE();
-
-        qDebug() << "TriangleRenderer::updateData: Loaded" << triangleDatas.size()
-            << "triangle groups with" << (vAllVertices.size() / 3)
-            << "vertices and" << (vAllIndices.size() / 3) << "triangles";
     }
 
     void TriangleRenderer::setBlendEnabled(bool enabled)

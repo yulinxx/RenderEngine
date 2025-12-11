@@ -94,6 +94,28 @@ namespace GLRhi
         m_vVertexCache.reserve(0);
     }
 
+
+    bool PolylinesVboManager::initialize(QOpenGLContext* context)
+    {
+        if (!context)
+        {
+            qWarning() << "[LineBufferManager] initialize: context is null";
+            return false;
+        }
+
+        m_context = context;
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
+        if (!m_gl)
+        {
+            qWarning() << "[LineBufferManager] initialize: failed to get OpenGL 3.3 functions";
+            return false;
+        }
+
+        m_gl->initializeOpenGLFunctions();
+        return true;
+    }
+
+
     /**
      * @brief 添加一条折线到渲染管理器
      *
@@ -114,7 +136,11 @@ namespace GLRhi
 
         std::unique_lock<std::shared_mutex> lock(m_mutex);
         if (m_IDLocationMap.count(id))
+        {
+            m_mutex.unlock();
+            setPolylineVisible(id, true);
             return false;
+        }
 
         ColorVBOBlock* block = getColorBlock(color);
         if (!block)
@@ -208,6 +234,7 @@ namespace GLRhi
     size_t PolylinesVboManager::addPolylines(
         const std::vector<std::tuple<long long, float*, size_t, Color>>& vPolylineDatas)
     {
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         if (vPolylineDatas.empty() || !m_gl)
             return 0;
 
@@ -512,6 +539,7 @@ namespace GLRhi
     void PolylinesVboManager::clearAllPrimitives()
     {
         // stopBackgroundDefrag();
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         std::unique_lock<std::shared_mutex> lock(m_mutex);
         for (auto& pair : m_colorBlocksMap)
         {
@@ -559,6 +587,7 @@ namespace GLRhi
      */
     void PolylinesVboManager::renderVisiblePrimitives()
     {
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         if (!m_gl)
             return;
 
@@ -611,6 +640,7 @@ namespace GLRhi
 
     void PolylinesVboManager::renderVisiblePrimitivesEx()
     {
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         if (!m_gl || m_colorBlocksMap.empty())
             return;
 
@@ -713,6 +743,7 @@ namespace GLRhi
         ColorVBOBlock* block = new ColorVBOBlock();
         block->color = color;
 
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         m_gl->glGenVertexArrays(1, &block->vao);
         m_gl->glGenBuffers(1, &block->vbo);
         m_gl->glGenBuffers(1, &block->ebo);
@@ -753,6 +784,8 @@ namespace GLRhi
      */
     void PolylinesVboManager::checkBlockCapacity(ColorVBOBlock* block, size_t nNeedV, size_t nNeedI)
     {
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
+
         if (1)
         {
             // Grok 优化版
@@ -889,6 +922,8 @@ namespace GLRhi
         GLsizeiptr nIdxOffset = static_cast<GLsizeiptr>(prim.nBaseVertex) * sizeof(unsigned int);
 
         // 顶点
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
+
         m_gl->glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
         m_gl->glBufferSubData(GL_ARRAY_BUFFER, nVertOffset,
             static_cast<GLsizeiptr>(vVerts.size() * sizeof(float)), vVerts.data());
@@ -926,6 +961,7 @@ namespace GLRhi
         newIndices.reserve(block->nVertexCount);
 
         size_t currentBase = 0;
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
 
         for (PrimitiveInfo& prim : block->vPrimitives)
         {
@@ -1024,13 +1060,15 @@ namespace GLRhi
         }
     }
 
-    void PolylinesVboManager::bindBlock(ColorVBOBlock* block) const
+    void PolylinesVboManager::bindBlock(ColorVBOBlock* block)
     {
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         m_gl->glBindVertexArray(block->vao);
     }
 
-    void PolylinesVboManager::unbindBlock() const
+    void PolylinesVboManager::unbindBlock()
     {
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         m_gl->glBindVertexArray(0);
     }
 

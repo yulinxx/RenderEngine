@@ -7,14 +7,9 @@
 #include "Render/LineRenderer.h"
 
 #include <vector>
+
 namespace GLRhi
 {
-    //struct PolylineData
-    //{
-    //    std::vector<float> vertices{}; //  x, y, len
-    //    Brush brush{ 0.0, 0.0, 0.0, 1.0, 0.0 };
-    //};
-
     class GLRENDER_API ColorLineRenderer : public IRenderer
     {
     public:
@@ -25,8 +20,8 @@ namespace GLRhi
         }
 
     public:
-        bool initialize(QOpenGLFunctions_3_3_Core* gl) override;
-        void render(const float* cameraMat) override;
+        bool initialize(QOpenGLContext* context) override;
+        void render(const float* matMVP = nullptr) override;
         void cleanup() override;
 
     public:

@@ -1,5 +1,5 @@
 #include "Render/LineBRenderer.h"
-#include "Shader/PathBoldShader.h" // 包含粗线着色器源码
+#include "Shader/PathBoldShader.h" 
 #include <QDebug>
 
 namespace GLRhi
@@ -9,15 +9,21 @@ namespace GLRhi
         cleanup();
     }
 
-    bool LineBRenderer::initialize(QOpenGLFunctions_3_3_Core* gl)
+    bool LineBRenderer::initialize(QOpenGLContext* context)
     {
-        m_gl = gl;
+        if (!context)
+        {
+            assert(false && "LineRenderer::initialize: context is null");
+            return false;
+        }
+
+        m_context = context;
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         if (!m_gl)
         {
             assert(false && "LineBRenderer initialize: OpenGL functions not available");
             return false;
         }
-
         m_program = new QOpenGLShaderProgram;
         if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, chPathBoldVS) ||
             !m_program->addShaderFromSourceCode(QOpenGLShader::Geometry, chPathBoldGS) ||
@@ -59,18 +65,18 @@ namespace GLRhi
         return true;
     }
 
-    void LineBRenderer::render(const float* cameraMat)
+    void LineBRenderer::render(const float* matMVP)
     {
         if (!m_gl || !m_program)
             return;
 
         m_program->bind();
-        if (m_uCameraMatLoc >= 0)
-            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
+        if (m_uCameraMatLoc >= 0 && matMVP)
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(matMVP));
 
         for (auto& lineBInfo : m_lineBInfos)
         {
-            if (lineBInfo.vao && lineBInfo.vertexCount > 0)
+            if (lineBInfo.vao && lineBInfo.count > 0)
             {
                 m_program->setUniformValue(m_uColorLoc,
                     QVector4D(lineBInfo.color.r(), lineBInfo.color.g(), lineBInfo.color.b(), lineBInfo.color.a()));
@@ -81,7 +87,7 @@ namespace GLRhi
                 m_program->setUniformValue(m_uDepthLoc, lineBInfo.color.d());
 
                 m_gl->glBindVertexArray(lineBInfo.vao);
-                m_gl->glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(lineBInfo.vertexCount));
+                m_gl->glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(lineBInfo.count));
                 m_gl->glBindVertexArray(0);
             }
         }
@@ -96,8 +102,8 @@ namespace GLRhi
         for (auto& lineBInfo : m_lineBInfos)
         {
             deleteVaoVbo(lineBInfo.vao, lineBInfo.vbo);
-            lineBInfo.vertices.clear();
-            lineBInfo.vertexCount = 0;
+            lineBInfo.verts.clear();
+            lineBInfo.count = 0;
         }
         m_lineBInfos.clear();
 
@@ -112,22 +118,22 @@ namespace GLRhi
         if (!m_gl || !data || count == 0)
             return;
 
-        LineBInfo lineBInfo;
+        LineBInfoEx lineBInfo;
         lineBInfo.color = color;
         lineBInfo.lineType = lineType;
         lineBInfo.dashScale = dashScale;
         lineBInfo.thickness = thickness;
 
-        size_t vertexCount = count / 3; // 每个顶点3个float: x, y, length
-        lineBInfo.vertices.resize(count);
-        memcpy(lineBInfo.vertices.data(), data, count * sizeof(float));
-        lineBInfo.vertexCount = vertexCount;
+        size_t sz = count / 3;
+        lineBInfo.verts.resize(sz);
+        memcpy(lineBInfo.verts.data(), data, count * sizeof(float));
+        lineBInfo.count = sz;
 
         m_gl->glGenVertexArrays(1, &lineBInfo.vao);
         m_gl->glGenBuffers(1, &lineBInfo.vbo);
         m_gl->glBindVertexArray(lineBInfo.vao);
         m_gl->glBindBuffer(GL_ARRAY_BUFFER, lineBInfo.vbo);
-        m_gl->glBufferData(GL_ARRAY_BUFFER, count * sizeof(float), lineBInfo.vertices.data(), GL_STATIC_DRAW);
+        m_gl->glBufferData(GL_ARRAY_BUFFER, count * sizeof(float), lineBInfo.verts.data(), GL_STATIC_DRAW);
         m_gl->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
         m_gl->glEnableVertexAttribArray(0);
         m_gl->glBindVertexArray(0);

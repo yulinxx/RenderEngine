@@ -9,15 +9,20 @@ namespace GLRhi
         cleanup();
     }
 
-    bool TextureRenderer::initialize(QOpenGLFunctions_3_3_Core* gl)
+    bool TextureRenderer::initialize(QOpenGLContext* context)
     {
-        m_gl = gl;
+        if (!context)
+        {
+            assert(false && "LineRenderer::initialize: context is null");
+            return false;
+        }
+        m_context = context;
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         if (!m_gl)
         {
             assert(false && "TextureRenderer::initialize: OpenGL functions not available");
             return false;
         }
-
         m_program = new QOpenGLShaderProgram;
         if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, chTextureVS) ||
             !m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, chTextureFS) ||
@@ -34,13 +39,13 @@ namespace GLRhi
         m_uTexLoc = m_program->uniformLocation("uTex");
         m_uAlphaLoc = m_program->uniformLocation("uAlpha");
 
-        bool bUniformError = (m_uCameraMatLoc < 0) || (m_uDepthLoc < 0) || (m_uTexLoc < 0) || (m_uAlphaLoc < 0);
-        if (bUniformError)
-        {
-            cleanup();
-            assert(false && "TextureRenderer: Failed to get uniform locations");
-            return false;
-        }
+        // bool bUniformError = (m_uCameraMatLoc < 0) || (m_uDepthLoc < 0) || (m_uTexLoc < 0) || (m_uAlphaLoc < 0);
+        // if (bUniformError)
+        // {
+        //     cleanup();
+        //     assert(false && "TextureRenderer: Failed to get uniform locations");
+        //     return false;
+        // }
 
         m_program->release();
 
@@ -143,7 +148,7 @@ namespace GLRhi
         m_gl->glBindVertexArray(0);
     }
 
-    void TextureRenderer::render(const float* cameraMat)
+    void TextureRenderer::render(const float* matMVP)
     {
         if (!m_gl || !m_program || m_vBatches.empty())
             return;
@@ -154,8 +159,8 @@ namespace GLRhi
         m_gl->glEnable(GL_BLEND);
         m_gl->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        if (m_uCameraMatLoc >= 0)
-            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
+        if (m_uCameraMatLoc >= 0 && matMVP)
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(matMVP));
 
         m_gl->glActiveTexture(GL_TEXTURE0);
         m_program->setUniformValue(m_uTexLoc, 0);

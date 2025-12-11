@@ -78,11 +78,11 @@ namespace GLRhi
     private:
         Impl* m_impl{ nullptr };
 
-        std::vector<PolylineData> m_vPolylineDatas; // 线段数据
-        std::vector<TriangleData> m_vTriangleDatas; // 三角形数据
-        std::vector<TextureData> m_vTextureDatas; // 纹理数据
-        std::vector<InstanceTexData> m_vInstanceTextureDatas; // 实例纹理数据
-        std::vector<InstanceLineData> m_vInstanceLineDatas; // 实例线段数据
+        std::vector<PolylineData> m_vPolylineDatas;             // 线段数据
+        std::vector<TriangleData> m_vTriangleDatas;             // 三角形数据
+        std::vector<TextureData> m_vTextureDatas;               // 纹理数据
+        std::vector<InstanceTexData> m_vInstanceTextureDatas;   // 实例纹理数据
+        std::vector<InstanceLineData> m_vInstanceLineDatas;     // 实例线段数据
         std::vector<InstanceTriangleData> m_vInstanceTriangleDatas; // 实例三角形数据
     };
 }

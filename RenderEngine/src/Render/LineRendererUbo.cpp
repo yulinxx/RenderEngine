@@ -13,15 +13,22 @@ namespace GLRhi
         cleanup();
     }
 
-    bool LineRendererUbo::initialize(QOpenGLFunctions_3_3_Core* gl)
+    bool LineRendererUbo::initialize(QOpenGLContext* context)
     {
-        m_gl = gl;
+        if (!context)
+        {
+            assert(false && "LineRenderer::initialize: context is null");
+            return false;
+        }
+
+        m_context = context;
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
+
         if (!m_gl)
         {
             assert(false && "LineRendererUbo::initialize: OpenGL functions not available");
             return false;
         }
-
         m_program = new QOpenGLShaderProgram;
         if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, chLineUboVS) ||
             !m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, chLineUboFS) ||
@@ -78,7 +85,7 @@ namespace GLRhi
         m_gl = nullptr;
     }
 
-    void LineRendererUbo::render(const float* cameraMat)
+    void LineRendererUbo::render(const float* matMVP)
     {
         if (!m_nVao || !m_totalIndexCount || !m_program)
             return;
@@ -89,14 +96,13 @@ namespace GLRhi
         GLuint m_uUboLoc = m_gl->glGetUniformBlockIndex(m_program->programId(), "uLineDataUBO");
         if (m_uUboLoc != GL_INVALID_INDEX)
         {
-            // 没有在着色器中指定binding，则手动关联
             m_gl->glUniformBlockBinding(m_program->programId(), m_uUboLoc, 0);
 
             m_gl->glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_nUbo);
         }
 
-        if (m_uCameraMatLoc >= 0)
-            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
+        if (m_uCameraMatLoc >= 0 && matMVP)
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(matMVP));
 
         m_gl->glDisable(GL_DEPTH_TEST);
         m_gl->glEnable(GL_LINE_SMOOTH);
@@ -200,7 +206,6 @@ namespace GLRhi
                 indexOffset += static_cast<GLuint>(lineVertexCount) + 1;
             }
 
-            // 顶点：位置 + 所属线段组ID
             for (size_t i = 0; i < group.vVerts.size() / 3; ++i)
             {
                 vertexData.push_back(group.vVerts[i * 3 + 0]);
@@ -212,7 +217,6 @@ namespace GLRhi
 
         m_totalIndexCount = static_cast<GLsizei>(indexData.size());
 
-        // 更新UBO数据 更新一次后，所有绑定到该UBO的着色器都会自动使用新数据
         m_gl->glBindBuffer(GL_UNIFORM_BUFFER, m_nUbo);
         m_gl->glBufferData(GL_UNIFORM_BUFFER, 2048 * 4 * sizeof(float) + 2048 * sizeof(float), nullptr, GL_STATIC_DRAW);
         m_gl->glBufferSubData(GL_UNIFORM_BUFFER, 0, uboColors.size() * sizeof(float), uboColors.data());

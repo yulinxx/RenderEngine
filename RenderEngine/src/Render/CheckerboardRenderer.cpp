@@ -15,12 +15,19 @@ namespace GLRhi
         cleanup();
     }
 
-    bool CheckerboardRenderer::initialize(QOpenGLFunctions_3_3_Core* gl)
+    bool CheckerboardRenderer::initialize(QOpenGLContext* context)
     {
-        m_gl = gl;
+        if (!context)
+        {
+            assert(false && "CheckerboardRenderer initialize: context is null");
+            return false;
+        }
+        m_context = context;
+        
+        m_gl = context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         if (!m_gl)
         {
-            assert(false && "CheckerboardRenderer initialize: OpenGL functions not available");
+            assert(false && "CheckerboardRenderer initialize: Failed to get OpenGL functions");
             return false;
         }
 
@@ -49,7 +56,7 @@ namespace GLRhi
 
         m_program->release();
 
-        float vertices[] = {
+        float verts[] = {
             -1.0f, -1.0f,
              3.0f, -1.0f,
             -1.0f,  3.0f
@@ -58,7 +65,7 @@ namespace GLRhi
         m_gl->glGenBuffers(1, &m_nVbo);
         m_gl->glBindVertexArray(m_nVao);
         m_gl->glBindBuffer(GL_ARRAY_BUFFER, m_nVbo);
-        m_gl->glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        m_gl->glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
         m_gl->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
         m_gl->glEnableVertexAttribArray(0);
 
@@ -75,7 +82,7 @@ namespace GLRhi
         return true;
     }
 
-    void CheckerboardRenderer::render(const float* cameraMat)
+    void CheckerboardRenderer::render(const float* matMVP)
     {
         if (!m_gl || !m_program || !m_bVisible || !m_nVao)
             return;

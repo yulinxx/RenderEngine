@@ -4,9 +4,8 @@
 #include <cassert>
 #include <memory>
 
-#include "Common/TextureLoader.h"
-
 #include "Common/Tools.h"
+#include "Common/TextureLoader.h"
 
 namespace GLRhi
 {
@@ -21,18 +20,24 @@ namespace GLRhi
         cleanup();
     }
 
-    bool RenderManager::initialize(QOpenGLFunctions_3_3_Core* gl)
+    bool RenderManager::initialize(QOpenGLContext* context)
     {
-        m_gl = gl;
+        if (!context)
+        {
+            assert(false && "LineRenderer::initialize: context is null");
+            return false;
+        }
+        m_context = context;
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         if (!m_gl)
         {
             assert(!"RenderManager initialize: OpenGL functions not available");
             return false;
         }
-
         // 初始化所有渲染器
         m_boardRenderer = std::make_unique<CheckerboardRenderer>();
         m_lineRenderer = std::make_unique<LineRenderer>();
+        //m_lineRenderer = std::make_unique<LineTestRenderer>();
         m_lineUBORenderer = std::make_unique<LineRendererUbo>();
         m_lineBRenderer = std::make_unique<LineBRenderer>();
         m_triRenderer = std::make_unique<TriangleRenderer>();
@@ -42,17 +47,21 @@ namespace GLRhi
         m_instanceLineRenderer = std::make_unique<InstanceLineRenderer>();
         m_instanceTriangleRenderer = std::make_unique<InstanceTriangleRenderer>();
 
+        // 初始化伪数据生成器
+        // m_instanceLineFakeData = std::make_unique<InstanceLineFakeData>();
+        // m_instanceTriangleFakeData = std::make_unique<InstanceTriangleFakeData>();
+
         bool success = true;
-        success &= m_boardRenderer->initialize(m_gl);
-        success &= m_lineRenderer->initialize(m_gl);
-        success &= m_lineUBORenderer->initialize(m_gl);
-        success &= m_lineBRenderer->initialize(m_gl);
-        success &= m_triRenderer->initialize(m_gl);
-        success &= m_imageRenderer->initialize(m_gl);
-        success &= m_texRenderer->initialize(m_gl);
-        success &= m_instancTexRenderer->initialize(m_gl);
-        success &= m_instanceLineRenderer->initialize(m_gl);
-        success &= m_instanceTriangleRenderer->initialize(m_gl);
+        success &= m_boardRenderer->initialize(context);
+        success &= m_lineRenderer->initialize(context);
+        success &= m_lineUBORenderer->initialize(context);
+        success &= m_lineBRenderer->initialize(context);
+        success &= m_triRenderer->initialize(context);
+        success &= m_imageRenderer->initialize(context);
+        success &= m_texRenderer->initialize(context);
+        success &= m_instancTexRenderer->initialize(context);
+        success &= m_instanceLineRenderer->initialize(context);
+        success &= m_instanceTriangleRenderer->initialize(context);
 
         if (!success)
         {
@@ -60,21 +69,22 @@ namespace GLRhi
             return false;
         }
 
-        // 移除了genFakeData调用，因为这个方法已经被移除
+        // genFakeData();
 
         return true;
     }
 
-    void RenderManager::render(const float* cameraMat)
+    void RenderManager::render(const float* matMVP)
     {
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         if (!m_gl)
             return;
 
         m_gl->glClearColor(m_bgColor.r(), m_bgColor.g(), m_bgColor.b(), m_bgColor.a());
         m_gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        const float* mat = cameraMat;
-        if (!cameraMat)
+        const float* mat = matMVP;
+        if (!matMVP)
         {
             float defaultMvpMatrix[16] = {
                 1.0f, 0.0f, 0.0f, 0.0f,
@@ -100,6 +110,10 @@ namespace GLRhi
 
     void RenderManager::cleanup()
     {
+        //if(!m_context)
+
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
+
         m_boardRenderer->cleanup();
         m_lineRenderer->cleanup();
         m_lineUBORenderer->cleanup();
@@ -111,7 +125,23 @@ namespace GLRhi
         m_instanceLineRenderer->cleanup();
         m_instanceTriangleRenderer->cleanup();
 
-        // 移除了FakeData相关的清理代码，因为这些变量已经被移除
+        // if (m_instanceLineFakeData)
+        // {
+        //     m_instanceLineFakeData->clear();
+        //     m_instanceLineFakeData = nullptr;
+        // }
+
+        // if (m_instanceTriangleFakeData)
+        // {
+        //     m_instanceTriangleFakeData->clear();
+        //     m_instanceTriangleFakeData = nullptr;
+        // }
+
+        // if (m_dataGen)
+        // {
+        //     m_dataGen->cleanup();
+        //     m_dataGen = nullptr;
+        // }
 
         m_gl = nullptr;
     }
@@ -175,6 +205,87 @@ namespace GLRhi
     {
         return m_bgColor;
     }
+
+    // void RenderManager::genFakeData()
+    // {
+    //     if (!m_dataGen)
+    //     {
+    //         m_dataGen = std::make_unique<FakeDataProvider>();
+    //         m_dataGen->initialize();
+    //     }
+
+    //     static bool b = true;
+    //     b = !b;
+    //     static_cast<TriangleRenderer*>(m_triRenderer.get())->setBlendEnabled(b);
+
+    //     static_cast<CheckerboardRenderer*>(m_boardRenderer.get())->setVisible(true);
+
+    //     // 线段数据
+    //     if (1)
+    //     {
+    //         std::vector<PolylineData> vPLineDatas = m_dataGen->genLineData(60);
+
+    //         // static_cast<LineRendererUbo*>(m_lineUBORenderer.get())->updateData(vPLineDatas);
+    //         // m_dataManager.setPolylineDatas(vPLineDatas);
+
+    //         //static_cast<LineRenderer*>(m_lineRenderer.get())->updateData(vPLineDatas);
+    //         //m_dataManager.setPolylineDatas(vPLineDatas);
+    //     }
+
+    //     // 三角形数据
+    //     if (0)
+    //     {
+    //         std::vector<TriangleData> vTriDatas = m_dataGen->genTriangleData();
+    //         static_cast<TriangleRenderer*>(m_triRenderer.get())->updateData(vTriDatas);
+
+    //         m_dataManager.setTriangleDatas(vTriDatas);
+    //     }
+
+    //     // 纹理数据
+    //     if (0)
+    //     {
+    //         std::vector<TextureData> vTexDatas = m_dataGen->genTextureData();
+    //         static_cast<TextureRenderer*>(m_texRenderer.get())->updateData(vTexDatas);
+    //         m_dataManager.setTextureDatas(vTexDatas);
+    //     }
+
+    //     // 实例化纹理数据
+    //     if (0)
+    //     {
+    //         GLuint textureArrayId = 0;
+    //         int textureCount = 0;
+    //         std::vector<InstanceTexData> vInstances =
+    //             m_dataGen->genInstanceTextureData(textureArrayId, textureCount);
+
+    //         if (textureArrayId > 0 && !vInstances.empty())
+    //         {
+    //             static_cast<InstanceTextureRenderer*>(m_instancTexRenderer.get())
+    //                 ->setTextureArray(textureArrayId, textureCount);
+
+    //             static_cast<InstanceTextureRenderer*>(m_instancTexRenderer.get())->updateInstances(vInstances);
+
+    //             m_dataManager.setInstanceTextureDatas(vInstances);
+    //         }
+    //     }
+
+    //     // 实例化线段数据
+    //     if (0)
+    //     {
+    //         m_instanceLineFakeData->genLines(1000, 0.001f, 0.003f);
+    //         std::vector<InstanceLineData>& lineData = m_instanceLineFakeData->getInstanceData();
+    //         static_cast<InstanceLineRenderer*>(m_instanceLineRenderer.get())->updateInstances(lineData);
+
+    //         m_dataManager.setInstanceLineDatas(lineData);
+    //     }
+
+    //     // 实例化三角形数据
+    //     if (0)
+    //     {
+    //         m_instanceTriangleFakeData->genTriangles(1000, 0.02f, 0.050f);
+    //         const auto& triangleData = m_instanceTriangleFakeData->getInstanceData();
+    //         static_cast<InstanceTriangleRenderer*>(m_instanceTriangleRenderer.get())->updateInstances(triangleData);
+    //     }
+    // }
 
     void RenderManager::dataCRUD()
     {

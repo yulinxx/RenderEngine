@@ -1,10 +1,10 @@
 #ifndef RENDERMANAGER_H
 #define RENDERMANAGER_H
 
-#include "Common/DllSet.h"
 #include "IRenderer.h"
 #include "CheckerboardRenderer.h"
 #include "LineRenderer.h"
+#include "LineTestRenderer.h"
 #include "LineRendererUbo.h"
 #include "LineBRenderer.h"
 #include "TriangleRenderer.h"
@@ -15,8 +15,12 @@
 #include "InstanceTriangleRenderer.h"
 #include "RenderCommon.h"
 
+#include "Common/DllSet.h"
 #include "Render/RenderDataManager.h"
 
+// #include "FakeData/FakeDataProvider.h"
+// #include "FakeData/InstanceLineFakeData.h"
+// #include "FakeData/InstanceTriangleFakeData.h"
 #include <QOpenGLFunctions_3_3_Core>
 
 #include <memory>
@@ -31,7 +35,7 @@ namespace GLRhi
 
     public:
         // 初始化所有渲染器
-        bool initialize(QOpenGLFunctions_3_3_Core* gl);
+        bool initialize(QOpenGLContext* context);
 
         // 渲染
         void render(const float* cameraMat);
@@ -59,8 +63,10 @@ namespace GLRhi
 
     private:
         QOpenGLFunctions_3_3_Core* m_gl{ nullptr };  // OpenGL函数指针
+        QOpenGLContext* m_context{ nullptr };
         Brush m_bgColor{ 1.0, 1.0, 0.0, -1.0 }; // 背景色
 
+        // 渲染器
         std::unique_ptr<IRenderer> m_boardRenderer{ nullptr };
         std::unique_ptr<IRenderer> m_lineRenderer{ nullptr };
         std::unique_ptr<IRenderer> m_lineUBORenderer{ nullptr };
@@ -71,6 +77,13 @@ namespace GLRhi
         std::unique_ptr<IRenderer> m_instancTexRenderer{ nullptr };
         std::unique_ptr<IRenderer> m_instanceLineRenderer{ nullptr };
         std::unique_ptr<IRenderer> m_instanceTriangleRenderer{ nullptr };
+
+        // // 实例化伪数据生成器
+        // std::unique_ptr<InstanceLineFakeData> m_instanceLineFakeData{ nullptr };
+        // std::unique_ptr<InstanceTriangleFakeData> m_instanceTriangleFakeData{ nullptr };
+
+        // // 数据生成器
+        // std::unique_ptr<FakeDataProvider> m_dataGen{ nullptr };
 
         RenderDataManager m_dataManager;
     };

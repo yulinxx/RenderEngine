@@ -9,25 +9,22 @@
 
 namespace GLRhi
 {
-    // Impl类定义，用于存储所有渲染数据
     class Impl
     {
     public:
-        std::vector<PolylineData> m_lines;              // 存储线段数据
-        std::vector<TriangleData> m_triangles;          // 存储三角形数据
-        std::vector<TextureData> m_textures;            // 存储纹理数据
-        std::vector<PolylineData> m_instanceLines;      // 存储实例化线段数据
-        std::vector<TriangleData> m_instanceTriangles;  // 存储实例化三角形数据
-        std::vector<TextureData> m_instanceTextures;    // 存储实例化纹理数据
+        std::vector<PolylineData> m_lines;              // 线段
+        std::vector<TriangleData> m_triangles;          // 三角形
+        std::vector<TextureData> m_textures;            // 纹理
+        std::vector<PolylineData> m_instanceLines;      // 实例化线段
+        std::vector<TriangleData> m_instanceTriangles;  // 实例化三角形
+        std::vector<TextureData> m_instanceTextures;    // 实例化纹理
     };
 
-    // 构造函数
     RenderDataManager::RenderDataManager()
         : m_impl(new Impl())
     {
     }
 
-    // 析构函数
     RenderDataManager::~RenderDataManager()
     {
         delete m_impl;
@@ -43,18 +40,16 @@ namespace GLRhi
         if (m_vPolylineDatas.empty())
             return;
 
-        // 1. 随机删除20%的图元
+        // 随机删除图元
         size_t removeCount = static_cast<size_t>(m_vPolylineDatas.size() * 0.2f);
         if (removeCount > 0)
         {
-            // 随机打乱索引
             std::vector<size_t> indices(m_vPolylineDatas.size());
             for (size_t i = 0; i < m_vPolylineDatas.size(); ++i)
                 indices[i] = i;
 
             std::shuffle(indices.begin(), indices.end(), std::default_random_engine(std::rand()));
 
-            // 保留不需要删除的索引
             std::vector<PolylineData> newPolylineDatas;
             newPolylineDatas.reserve(m_vPolylineDatas.size() - removeCount);
 
@@ -64,33 +59,28 @@ namespace GLRhi
             m_vPolylineDatas = std::move(newPolylineDatas);
         }
 
-        // 2. 修改15%的图元的顶点及颜色数据
+        // 修改图元数据
         size_t modifyCount = static_cast<size_t>(m_vPolylineDatas.size() * 0.15f);
         if (modifyCount > 0)
         {
-            // 随机选择要修改的索引
             std::vector<size_t> indices(m_vPolylineDatas.size());
             for (size_t i = 0; i < m_vPolylineDatas.size(); ++i)
                 indices[i] = i;
 
             std::shuffle(indices.begin(), indices.end(), std::default_random_engine(std::rand()));
 
-            // 修改选中的图元
             for (size_t i = 0; i < modifyCount && i < indices.size(); ++i)
             {
                 size_t idx = indices[i];
 
-                // 修改顶点数据 - 随机偏移
                 for (size_t j = 0; j < m_vPolylineDatas[idx].vVerts.size(); j += 3)
                 {
-                    // 只修改x和y坐标，保持长度不变
                     float offsetX = (static_cast<float>(std::rand()) / RAND_MAX - 0.5f) * 0.1f;
                     float offsetY = (static_cast<float>(std::rand()) / RAND_MAX - 0.5f) * 0.1f;
                     m_vPolylineDatas[idx].vVerts[j] += offsetX;
                     m_vPolylineDatas[idx].vVerts[j + 1] += offsetY;
                 }
 
-                // 修改颜色数据
                 float r = static_cast<float>(std::rand()) / RAND_MAX;
                 float g = static_cast<float>(std::rand()) / RAND_MAX;
                 float b = static_cast<float>(std::rand()) / RAND_MAX;
@@ -99,14 +89,12 @@ namespace GLRhi
             }
         }
 
-        // 3. 添加新数据 - 创建不固定数量的新线段，但确保总数不超过五百万
+        // 添加新数据
 
-        // 设置最大值
-        const size_t MAX_TOTAL_COUNT = 5000000;
+        const size_t MAX_COUNT = 5000000;
 
-        // 计算还可以添加的最大数量（随机添加1到10条，但不超过最大值限制）
         size_t currentCount = m_vPolylineDatas.size();
-        size_t availableSlots = MAX_TOTAL_COUNT > currentCount ? MAX_TOTAL_COUNT - currentCount : 0;
+        size_t availableSlots = MAX_COUNT > currentCount ? MAX_COUNT - currentCount : 0;
 
         if (availableSlots > 0)
         {
@@ -144,7 +132,7 @@ namespace GLRhi
         }
         else
         {
-            qDebug() << "已达到最大线段数量限制 (" << MAX_TOTAL_COUNT << ")，无法添加新线段";
+            qDebug() << "已达到最大线段数量限制 (" << MAX_COUNT << ")";
         }
     }
 
@@ -185,12 +173,8 @@ namespace GLRhi
 
     void RenderDataManager::modifyLine(const PolylineData& line)
     {
-        // 查找并修改指定的线段
-        // 注意：这里使用了简单的比较逻辑，实际应用中可能需要更复杂的比较
         for (auto& existingLine : m_impl->m_lines)
         {
-            // 假设通过顶点数据和颜色进行简单比较
-            // 在实际应用中，应该有更精确的标识方式
             if (existingLine.vVerts == line.vVerts &&
                 existingLine.vCount == line.vCount &&
                 existingLine.brush == line.brush)
@@ -211,7 +195,6 @@ namespace GLRhi
 
     void RenderDataManager::removeLine(const PolylineData& line)
     {
-        // 查找并删除指定的线段
         for (auto it = m_impl->m_lines.begin(); it != m_impl->m_lines.end(); ++it)
         {
             if (it->vVerts == line.vVerts &&
@@ -232,7 +215,6 @@ namespace GLRhi
         }
     }
 
-    // Triangle相关方法实现
     void RenderDataManager::addTriangle(const TriangleData& triangle)
     {
         m_impl->m_triangles.push_back(triangle);
@@ -287,7 +269,6 @@ namespace GLRhi
         }
     }
 
-    // Texture相关方法实现
     void RenderDataManager::addTexture(const TextureData& texture)
     {
         m_impl->m_textures.push_back(texture);
@@ -336,7 +317,6 @@ namespace GLRhi
         }
     }
 
-    // Instance Line相关方法实现
     void RenderDataManager::addInstanceLine(const PolylineData& instanceLine)
     {
         m_impl->m_instanceLines.push_back(instanceLine);
@@ -391,7 +371,6 @@ namespace GLRhi
         }
     }
 
-    // Instance Triangle相关方法实现
     void RenderDataManager::addInstanceTriangle(const TriangleData& instanceTriangle)
     {
         m_impl->m_instanceTriangles.push_back(instanceTriangle);
@@ -446,7 +425,6 @@ namespace GLRhi
         }
     }
 
-    // Instance Texture相关方法实现
     void RenderDataManager::addInstanceTexture(const TextureData& instanceTexture)
     {
         m_impl->m_instanceTextures.push_back(instanceTexture);

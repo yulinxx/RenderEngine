@@ -11,32 +11,30 @@ namespace GLRhi
     class GLRENDER_API LineRenderer : public IRenderer
     {
     public:
-        LineRenderer() = default;
+        LineRenderer();
         ~LineRenderer() override;
 
     public:
-        bool initialize(QOpenGLFunctions_3_3_Core* gl) override;
-        void render(const float* cameraMat) override;
+        bool initialize(QOpenGLContext* context) override;
+        void render(const float* matMVP = nullptr) override;
         void cleanup() override;
 
     public:
+        void clearData() override;
+
         void updateData(const std::vector<PolylineData>& vPolylineDatas);
+        void addPolyline(long long id, const float* verts, size_t n, float r, float g, float b);
+
 
     private:
-        GLuint m_nVao = 0;
-        GLuint m_nVbo = 0;
-        GLuint m_nEbo = 0;
-
-        std::vector<Brush> m_vPlineBrush;       // 每类线的颜色信息
-        std::vector<GLuint> m_vIndexCounts;     // 每条线段顶点数
-        std::vector<GLuint> m_vIndexOffsets;    // 索引偏移量
+        QMatrix3x3 m_mat;
 
         // Uniform
         int m_uCameraMatLoc = -1;
         int m_uColorLoc = -1;
         int m_uDepthLoc = -1;
 
-        PolylinesVboManager m_vboManager;
+        PolylinesVboManager m_lineBuffer;
     };
 }
 #endif // LINE_RENDERER_H

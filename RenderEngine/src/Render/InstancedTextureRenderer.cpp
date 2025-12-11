@@ -9,15 +9,20 @@ namespace GLRhi
         cleanup();
     }
 
-    bool InstanceTextureRenderer::initialize(QOpenGLFunctions_3_3_Core* gl)
+    bool InstanceTextureRenderer::initialize(QOpenGLContext* context)
     {
-        m_gl = gl;
+        if (!context)
+        {
+            assert(false && "InstanceTextureRenderer::initialize: context is null");
+            return false;
+        }
+        m_context = context;
+        m_gl = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         if (!m_gl)
         {
             assert(false && "InstanceTextureRenderer::initialize: OpenGL functions not available");
             return false;
         }
-
         m_program = new QOpenGLShaderProgram;
         if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, chInstanceVS) ||
             !m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, chInstanceFS) ||
@@ -67,11 +72,11 @@ namespace GLRhi
         m_gl->glBindBuffer(GL_ARRAY_BUFFER, m_nQuadVbo);
         m_gl->glBufferData(GL_ARRAY_BUFFER, sizeof(arrUnitQuad), arrUnitQuad, GL_STATIC_DRAW);
 
-        // 位置坐标
+        // 位置
         m_gl->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
         m_gl->glEnableVertexAttribArray(0);
 
-        // 纹理坐标
+        // 纹理
         m_gl->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
         m_gl->glEnableVertexAttribArray(1);
 
@@ -133,14 +138,14 @@ namespace GLRhi
 
         const GLsizeiptr nNewSz = static_cast<GLsizeiptr>(vData.size() * sizeof(InstanceTexData));
 
-        if (nNewSz > bufferSize) // 重新分配内存空间
+        if (nNewSz > bufferSize)
         {
             m_gl->glBufferData(GL_ARRAY_BUFFER,
                 nNewSz,
                 vData.data(),
                 GL_DYNAMIC_DRAW);
         }
-        else // 更新数据
+        else
         {
             m_gl->glBufferSubData(GL_ARRAY_BUFFER, 0, nNewSz, vData.data());
         }
@@ -148,7 +153,7 @@ namespace GLRhi
         m_gl->glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    void InstanceTextureRenderer::render(const float* cameraMat)
+    void InstanceTextureRenderer::render(const float* matMVP)
     {
         if (!m_gl || !m_program || m_nInstCount == 0 || m_texArray == 0)
             return;
@@ -166,8 +171,8 @@ namespace GLRhi
         //     m_program->setUniformValue(m_cameraMatLoc, mat);
         // }
 
-        if (m_uCameraMatLoc >= 0)
-            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
+        if (m_uCameraMatLoc >= 0 && matMVP)
+            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(matMVP));
 
         if (m_uTexArrayLoc >= 0)
         {

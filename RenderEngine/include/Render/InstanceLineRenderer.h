@@ -15,8 +15,8 @@ namespace GLRhi
         ~InstanceLineRenderer() override;
 
     public:
-        bool initialize(QOpenGLFunctions_3_3_Core* gl) override;
-        void render(const float* cameraMat) override;
+        bool initialize(QOpenGLContext* context) override;
+        void render(const float* matMVP = nullptr) override;
         void cleanup() override;
 
     public:

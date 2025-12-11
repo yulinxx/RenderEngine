@@ -9,12 +9,12 @@
 
 namespace GLRhi
 {
-    struct LineBInfo
+    struct LineBInfoEx
     {
         GLuint vao = 0;
         GLuint vbo = 0;
-        std::vector<float> vertices; // 格式: x, y, length (每个顶点3个float)
-        size_t vertexCount = 0;
+        std::vector<float> verts; // 格式: x, y, length (每个顶点3个float)
+        size_t count = 0;
         Brush color;
         int lineType = 100;       // 线类型（实线/虚线等）
         float dashScale = 1.0f;   // 虚线比例
@@ -30,8 +30,8 @@ namespace GLRhi
             cleanup();
         }
 
-        bool initialize(QOpenGLFunctions_3_3_Core* gl) override;
-        void render(const float* cameraMat) override;
+        bool initialize(QOpenGLContext* context) override;
+        void render(const float* matMVP = nullptr) override;
         void cleanup() override;
 
         // 更新粗线数据
@@ -40,7 +40,7 @@ namespace GLRhi
 
     private:
 
-        std::vector<LineBInfo> m_lineBInfos;
+        std::vector<LineBInfoEx> m_lineBInfos;
 
         float m_dDepth = 0.4f;
 

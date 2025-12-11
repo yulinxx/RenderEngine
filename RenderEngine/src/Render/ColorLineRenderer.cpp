@@ -5,14 +5,15 @@
 
 namespace GLRhi
 {
-    bool ColorLineRenderer::initialize(QOpenGLFunctions_3_3_Core* gl)
+    bool ColorLineRenderer::initialize(QOpenGLContext* context)
     {
-        m_gl = gl;
+        m_gl = context->versionFunctions<QOpenGLFunctions_3_3_Core>();
         if (!m_gl)
         {
             assert(false && "ColorLineRenderer::initialize: OpenGL functions not available");
             return false;
         }
+        m_context = context;
 
         m_program = new QOpenGLShaderProgram;
 
@@ -26,7 +27,7 @@ namespace GLRhi
         }
 
         m_program->bind();
-        m_uCameraMatLoc = m_program->uniformLocation("cameraMat");
+        m_uCameraMatLoc = m_program->uniformLocation("uCameraMat");
         m_uColorLoc = m_program->uniformLocation("uColor");
         m_uDepthLoc = m_program->uniformLocation("uDepth");
 
@@ -51,15 +52,23 @@ namespace GLRhi
         return true;
     }
 
-    void ColorLineRenderer::render(const float* cameraMat)
+    void ColorLineRenderer::render(const float* matMVP)
     {
         if (!m_gl || !m_program || m_vIndices.empty() || m_vPlineInfos.empty())
             return;
 
         m_program->bind();
 
-        if (m_uCameraMatLoc >= 0)
-            m_program->setUniformValue(m_uCameraMatLoc, QMatrix4x4(cameraMat));
+        if (m_uCameraMatLoc >= 0 && matMVP)
+        {
+            // QMatrix3x3内部是按列优先存储的，与OpenGL兼容
+            // matMVP已经是按列优先顺序存储的（MatToFloat函数的输出）
+            QMatrix3x3 mat;
+            mat(0, 0) = matMVP[0]; mat(1, 0) = matMVP[1]; mat(2, 0) = matMVP[2]; // 第一列
+            mat(0, 1) = matMVP[3]; mat(1, 1) = matMVP[4]; mat(2, 1) = matMVP[5]; // 第二列
+            mat(0, 2) = matMVP[6]; mat(1, 2) = matMVP[7]; mat(2, 2) = matMVP[8]; // 第三列
+            m_program->setUniformValue(m_uCameraMatLoc, mat);
+        }
 
         m_gl->glEnable(GL_PRIMITIVE_RESTART);
         m_gl->glPrimitiveRestartIndex(0xFFFFFFFF);
@@ -82,7 +91,7 @@ namespace GLRhi
 
             // 查找当前多段线的索引数量（从当前偏移位置开始，直到找到图元重启索引）
             size_t indexCount = 0;
-            size_t maxIterations = maxIndices - indexOffset; // 避免无限循环
+            size_t maxIterations = maxIndices - indexOffset;
 
             while (indexCount < maxIterations &&
                 indexOffset + indexCount < maxIndices &&
@@ -91,13 +100,11 @@ namespace GLRhi
                 indexCount++;
             }
 
-            // 如果找到了图元重启索引，则索引数量包含当前顶点数和重启索引
             if (indexOffset + indexCount < maxIndices && m_vIndices[indexOffset + indexCount] == 0xFFFFFFFF)
             {
-                indexCount += 1; // 包含图元重启索引
+                indexCount += 1;
             }
 
-            // 只有当有有效的索引时才绘制
             if (indexCount > 0 && indexOffset + indexCount <= maxIndices)
             {
                 m_gl->glDrawElements(GL_LINE_STRIP,
@@ -170,14 +177,14 @@ namespace GLRhi
 
             m_vPlineInfos.push_back(polyline);
 
-            size_t vertexCount = vertexSz / 3;
+            size_t count = vertexSz / 3;
             vVertices.insert(vVertices.end(), polyline.vVerts.begin(), polyline.vVerts.end());
 
-            for (size_t i = 0; i < vertexCount; ++i)
+            for (size_t i = 0; i < count; ++i)
                 m_vIndices.push_back(static_cast<GLuint>(nVertexOffset + i));
 
             m_vIndices.push_back(0xFFFFFFFF);
-            nVertexOffset += vertexCount;
+            nVertexOffset += count;
         }
 
         m_gl->glGenVertexArrays(1, &m_nVao);

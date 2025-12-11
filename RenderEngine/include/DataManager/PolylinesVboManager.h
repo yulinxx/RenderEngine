@@ -76,7 +76,9 @@ namespace GLRhi
     public:
         PolylinesVboManager();
         ~PolylinesVboManager();
+
     public:
+        bool initialize(QOpenGLContext* context);
 
         /**
          * @brief 添加单条折线
@@ -213,17 +215,18 @@ namespace GLRhi
          *
          * @param block 要绑定的块
          */
-        void bindBlock(ColorVBOBlock* block) const;
+        void bindBlock(ColorVBOBlock* block);
 
         /**
          * @brief 解绑当前块的OpenGL资源
          *
          * 安全地解除当前绑定的资源。
          */
-        void unbindBlock() const;
+        void unbindBlock();
 
     private:
         QOpenGLFunctions_3_3_Core* m_gl{ nullptr };
+        QOpenGLContext* m_context{ nullptr };
         mutable std::shared_mutex m_mutex;
 
         std::unordered_map<uint32_t, std::vector<ColorVBOBlock*>> m_colorBlocksMap; // 按颜色键分组的VBO块映射

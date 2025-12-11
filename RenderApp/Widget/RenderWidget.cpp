@@ -54,16 +54,16 @@ namespace GLRhi
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         // 初始化渲染管理器
-        if (!m_renderManager.initialize(this))
+        if (!m_renderManager.initialize(this->context()))
             qFatal("Initialize render manager failed!");
 
         // 初始化伪数据生成器
         m_dataGen = std::make_unique<FakeDataProvider>();
         m_dataGen->initialize();
-        
+
         m_instanceLineFakeData = std::make_unique<InstanceLineFakeData>();
         m_instanceTriangleFakeData = std::make_unique<InstanceTriangleFakeData>();
-        
+
         // 初始化相机矩阵
         m_camera.updateMatrix(size());
         checkGLError("initializeGL");
@@ -360,7 +360,8 @@ namespace GLRhi
     void RenderWidget::setShowCheckerboard(bool b)
     {
         auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
-        if (board) { // 添加空指针检查
+        if (board)
+        {
             board->setVisible(b);
             update();
         }
@@ -369,7 +370,8 @@ namespace GLRhi
     void RenderWidget::setCheckerboardSz(int n)
     {
         auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
-        if (board) { // 添加空指针检查
+        if (board)
+        {
             board->setSize(static_cast<float>(n));
             update();
         }
@@ -378,7 +380,8 @@ namespace GLRhi
     void RenderWidget::setShowCheckerboardColor(Brush brushA, Brush brushB)
     {
         auto board = static_cast<CheckerboardRenderer*>(m_renderManager.getCheckerboardRenderer());
-        if (board) { // 添加空指针检查
+        if (board)
+        {
             board->setColors(brushA.getColor(), brushB.getColor());
             update();
         }
@@ -394,7 +397,7 @@ namespace GLRhi
     {
         makeCurrent();
         m_renderManager.cleanup();
-        m_renderManager.initialize(this);
+        m_renderManager.initialize(this->context());
         m_camera = Camera();
         m_camera.updateMatrix(size());
         doneCurrent();
@@ -480,15 +483,50 @@ namespace GLRhi
         boardRenderer->setVisible(true);
 
         // 线段数据
-        if (0)
+        if (1)
         {
-            std::vector<PolylineData> vPLineDatas = m_dataGen->genLineData(60);
-            auto lineRenderer = static_cast<LineRenderer*>(m_renderManager.getLineRenderer());
-            lineRenderer->updateData(vPLineDatas);
+            //std::vector<PolylineData> vPLineDatas = m_dataGen->genLineData(60);
+            std::vector<PolylineData> vPLineDatas = m_dataGen->genLineData(1, 2);
+
+            if (1)
+            {
+                auto lineRenderer = static_cast<LineRenderer*>(m_renderManager.getLineRenderer());
+                lineRenderer->updateData(vPLineDatas);
+            }
+
+            if (0)
+            {
+                auto lineRenderer = static_cast<LineTestRenderer*>(m_renderManager.getLineRenderer());
+
+                // 先清空旧数据
+                lineRenderer->clearData();
+
+                for (auto& pls : vPLineDatas)
+                {
+                    auto& color = pls.brush.getColor();
+                    size_t offset = 0;  // 顶点在 vVerts 中的偏移
+                    for (size_t i = 0; i < pls.vId.size(); i++)
+                    {
+                        size_t nCount = pls.vCount[i];
+                        if (nCount < 2)
+                        {
+                            offset += nCount;
+                            continue;
+                        }
+
+                        // 正确提取顶点数据：从 offset * 3 位置开始，提取 nCount * 3 个 float
+                        const float* verts = pls.vVerts.data() + offset * 3;
+                        lineRenderer->addPolyline(pls.vId[i], verts, nCount * 3,
+                            color.r(), color.g(), color.b());
+
+                        offset += nCount;  // 更新偏移
+                    }
+                }
+            }
         }
 
         // 三角形数据
-        if (0)
+        if (1)
         {
             std::vector<TriangleData> vTriDatas = m_dataGen->genTriangleData();
             auto triRenderer = static_cast<TriangleRenderer*>(m_renderManager.getTriangleRenderer());
@@ -503,7 +541,6 @@ namespace GLRhi
             GLRhi::Brush brush(0.8f, 0.4f, 0.1f, 1.0f, 0.0f);
             GLRhi::TriangleData data = convertToTriangleData(fakeTriangleMesh, 1, brush);
             triRenderer->updateData({ data });
-
         }
 
         // 纹理数据
@@ -519,7 +556,7 @@ namespace GLRhi
         {
             GLuint textureArrayId = 0;
             int textureCount = 0;
-            std::vector<InstanceTexData> vInstances = 
+            std::vector<InstanceTexData> vInstances =
                 m_dataGen->genInstanceTextureData(textureArrayId, textureCount);
 
             if (textureArrayId > 0 && !vInstances.empty())

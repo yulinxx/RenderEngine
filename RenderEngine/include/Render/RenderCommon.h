@@ -1,10 +1,10 @@
 #ifndef RENDER_COMMON_H
 #define RENDER_COMMON_H
 
-#include "Common/DllSet.h"
 #include <QImage>
 #include <functional>
 #include <vector>
+#include "Common/DllSet.h"
 #include "Common/Brush.h"
 
 namespace GLRhi
@@ -17,25 +17,12 @@ namespace GLRhi
     };
 
     // 多段线
-    // 使用内存对齐优化的线段数据结构
     struct GLRENDER_API PolylineData
     {
-        //long long id;                         // ID
         std::vector<long long> vId;             // ID
-        std::vector<size_t> vCount;              // 线段顶点数
-        std::vector<float> vVerts{};             //  x, y, len
+        std::vector<size_t> vCount;             // 线段顶点数
+        std::vector<float> vVerts{};            //  x, y, len
         Brush brush{ 0.0, 0.0, 0.0, 1.0, 0.0 }; // 渲染信息
-
-        //// 构造函数确保数据一致性
-        //PolylineData() = default;
-        //
-        //// 移动构造函数，优化性能
-        //PolylineData(PolylineData&& other) noexcept = default;
-        //PolylineData& operator=(PolylineData&& other) noexcept = default;
-        //
-        //// 禁用拷贝构造和赋值，避免意外的深拷贝
-        //PolylineData(const PolylineData&) = delete;
-        //PolylineData& operator=(const PolylineData&) = delete;
     };
 
     // 实例化线段数据结构
@@ -52,8 +39,8 @@ namespace GLRhi
     struct GLRENDER_API TriangleData
     {
         long long id;                       // ID
-        std::vector<float> vVerts;           // x, y, len
-        std::vector<unsigned int> vIndices;  // 索引
+        std::vector<float> vVerts;          // x, y, len
+        std::vector<unsigned int> vIndices; // 索引
         Brush brush;
     };
 
@@ -71,7 +58,7 @@ namespace GLRhi
     struct GLRENDER_API TextureData
     {
         long long id;                       // ID
-        std::vector<float> vVerts;           //  x, y, u, v
+        std::vector<float> vVerts;          // x, y, u, v
         std::vector<unsigned int> vIndices;
         unsigned int tex;
         Brush brush;
@@ -80,7 +67,7 @@ namespace GLRhi
     // 实例纹理
     struct GLRENDER_API InstanceTexData
     {
-        long long id;                       // ID
+        long long id;        // ID
         float x, y;          // 位置
         float width, height; // 尺寸
         int   textureLayer;  // 纹理数组层索引

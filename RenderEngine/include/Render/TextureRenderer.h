@@ -1,7 +1,6 @@
 #ifndef TEXTURE_RENDERER_H
 #define TEXTURE_RENDERER_H
 
-#include "Common/DllSet.h"
 #include "Render/IRenderer.h"
 #include "Render/RenderCommon.h"
 
@@ -17,8 +16,8 @@ namespace GLRhi
         ~TextureRenderer() override;
 
     public:
-        bool initialize(QOpenGLFunctions_3_3_Core* gl) override;
-        void render(const float* cameraMat) override;
+        bool initialize(QOpenGLContext* context) override;
+        void render(const float* matMVP = nullptr) override;
         void cleanup() override;
         void updateData(const std::vector<TextureData>& vTexDatas);
 

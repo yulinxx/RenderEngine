@@ -1,19 +1,26 @@
 // TriangleRenderExample.cpp
-// 这是一个使用示例，展示如何使用 FakeTriangle 和 TriangleRenderer
+// 使用 FakeTriangle 和 TriangleRenderer
 
+#include "Common/Brush.h"
 #include "FakeData/fakeTriangleMesh.h"
 #include "FakeData/fakeTriangleMeshHelper.h"
 #include "Render/TriangleRenderer.h"
-#include "Common/Brush.h"
 
 // 示例：使用 FakeTriangle 和 TriangleRenderer 渲染随机多边形
 class TriangleRenderExample
 {
 public:
-    void initialize(QOpenGLFunctions_3_3_Core* gl)
+    void initialize(QOpenGLContext* context)
     {
+        if (!context)
+        {
+            assert(false && "LineRenderer::initialize: context is null");
+            return;
+        }
+
+
         // 1. 初始化渲染器
-        m_triangleRenderer.initialize(gl);
+        m_triangleRenderer.initialize(context);
 
         // 2. 生成随机多边形数据
         FakeTriangleMesh fakeTriangle;
@@ -33,7 +40,7 @@ public:
         m_triangleRenderer.updateData(triangleDatas);
     }
 
-    void render(const float* cameraMat)
+    void render(float* cameraMat)
     {
         // 5. 渲染
         m_triangleRenderer.render(cameraMat);
@@ -52,9 +59,15 @@ private:
 class MultiColorTriangleExample
 {
 public:
-    void initialize(QOpenGLFunctions_3_3_Core* gl)
+    void initialize(QOpenGLContext* context)
     {
-        m_triangleRenderer.initialize(gl);
+        if (!context)
+        {
+            assert(false && "LineRenderer::initialize: context is null");
+            return;
+        }
+
+        m_triangleRenderer.initialize(context);
 
         std::vector<GLRhi::TriangleData> triangleDatas;
 
@@ -85,7 +98,7 @@ public:
         m_triangleRenderer.updateData(triangleDatas);
     }
 
-    void render(const float* cameraMat)
+    void render(float* cameraMat)
     {
         m_triangleRenderer.render(cameraMat);
     }

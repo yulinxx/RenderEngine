@@ -1,9 +1,10 @@
 #ifndef TRIANGLE_RENDERER_H
 #define TRIANGLE_RENDERER_H
 
-#include "IRenderer.h"
-#include "RenderCommon.h"
+#include "Render/IRenderer.h"
+#include "Render/RenderCommon.h"
 #include <vector>
+#include <QOpenGLShaderProgram>
 
 namespace GLRhi
 {
@@ -14,34 +15,38 @@ namespace GLRhi
         ~TriangleRenderer() override;
 
     public:
-        bool initialize(QOpenGLFunctions_3_3_Core* gl) override;
-        void render(const float* cameraMat) override;
+        bool initialize(QOpenGLContext* context) override;
+        void render(const float* matMVP = nullptr) override;
         void cleanup() override;
 
     public:
-        // 更新三角形数据
-        void updateData(const std::vector<TriangleData>& triangleDatas);
+        void updateData(const std::vector<TriangleData>& vTriDatas);
 
-        // 设置是否启用颜色混合
+        // 是否启用颜色混合
         void setBlendEnabled(bool enabled);
-        // 获取当前混合状态
         bool isBlendEnabled() const;
 
+    public:
     private:
+        struct Batch
+        {
+            unsigned int indexOffset; // 索引缓冲区偏移（字节）
+            unsigned int indexCount;  // 索引数量
+            Brush brush;
+        };
+
         GLuint m_nVao = 0;
         GLuint m_nVbo = 0;
         GLuint m_nEbo = 0;
 
-        std::vector<Brush> m_vTriangleBrush;    // 每个三角形组的颜色信息
-        std::vector<GLuint> m_vIndexCounts;     // 每个三角形组的索引数
-        std::vector<GLuint> m_vIndexOffsets;    // 索引偏移量
+        std::vector<Batch> m_vecBatches;
 
-        bool m_bBlend = true;  // 是否启用混合
+        bool m_bBlend = true;
 
-        // Uniform locations
-        int m_uCameraMatLoc = -1;
-        int m_uColorLoc = -1;
-        int m_uDepthLoc = -1;
+        // Uniform
+        GLint m_uCameraMatLoc = -1;
+        GLint m_uColorLoc = -1;
+        GLint m_uDepthLoc = -1;
     };
 }
 
