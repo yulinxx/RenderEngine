@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
     format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
     QSurfaceFormat::setDefaultFormat(format);
 
-    GLRhi::ViewWrapper window;
+    ViewWrapper window;
     window.resize(1800, 1400);
     window.show();
 
